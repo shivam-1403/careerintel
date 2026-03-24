@@ -1,0 +1,239 @@
+.profile-page {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.profile-photo-card .card-content {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+}
+
+.profile-photo-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-photo {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-photo:hover .photo-overlay {
+    opacity: 1;
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.profile-status h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.profile-status p {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge.success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.profile-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.profile-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-stat-item:last-child {
+    border-bottom: none;
+}
+
+.ps-label {
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+.ps-value {
+    font-weight: 700;
+    color: var(--foreground);
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.profile-form label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--card-foreground);
+}
+
+.profile-form label svg {
+    color: var(--primary);
+}
+
+.section-divider {
+    height: 1px;
+    background-color: var(--border);
+    margin: 0.5rem 0;
+}
+
+.tag-input-container {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+    background-color: var(--background);
+}
+
+.tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.skill-tag {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.skill-tag button {
+    color: var(--muted-foreground);
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.skill-tag button:hover {
+    color: var(--destructive);
+}
+
+.skill-search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.skill-dropdown {
+    position: absolute;
+    top: 100%; /* BELOW input */
+    left: 0;
+    right: 0;
+    border: 1px solid #ddd;
+    background: white;
+    max-height: 180px;
+    overflow-y: auto;
+    z-index: 1000;
+    border-radius: 6px;
+    margin-top: 4px;
+}
+
+.skill-option {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.skill-option:hover {
+    background: #f3f4f6;
+}
+
+.tag-add-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tag-add-row input {
+    background-color: var(--card);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 968px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-left {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-left {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

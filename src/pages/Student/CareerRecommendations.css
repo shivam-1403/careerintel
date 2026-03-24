@@ -1,0 +1,218 @@
+.career-recommendations {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.header-with-badge {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ai-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.recommendations-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.recommendation-card {
+    transition: all var(--transition-normal);
+}
+
+.recommendation-card:hover {
+    transform: translateX(8px);
+    border-color: var(--primary);
+}
+
+.job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.job-title-area {
+    display: flex;
+    gap: 1.25rem;
+}
+
+.job-icon {
+    width: 50px;
+    height: 50px;
+    background-color: var(--input);
+    color: var(--primary);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.job-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.job-meta {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.job-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+}
+
+.match-score-area {
+    text-align: right;
+    background-color: var(--background);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.match-percentage {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.match-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+}
+
+.job-content {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 2rem;
+    padding: 1.5rem;
+    background-color: var(--background);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.5rem;
+}
+
+.explanation-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--card-foreground);
+    margin-bottom: 0.5rem;
+}
+
+.job-explanation p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.job-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-content: flex-start;
+}
+
+.trait-tag {
+    display: inline-block;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 4px 6px 0 0;
+}
+
+.job-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.priority-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.text-warning {
+    color: var(--warning);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.cta-card .card-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 3rem;
+    text-align: left;
+}
+
+.cta-text h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cta-text p {
+    color: var(--muted);
+}
+
+.mt-8 {
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .job-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .match-score-area {
+        width: 100%;
+        text-align: center;
+    }
+
+    .job-content {
+        grid-template-columns: 1fr;
+    }
+
+    .job-footer {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .cta-card .card-content {
+        flex-direction: column;
+        text-align: center;
+    }
+}

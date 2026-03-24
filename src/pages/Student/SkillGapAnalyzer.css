@@ -1,0 +1,227 @@
+.skill-gap-analyzer {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.analyzer-summary-row {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.target-card .card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.target-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.target-icon {
+    width: 48px;
+    height: 48px;
+    background-color: var(--ring);
+    color: var(--primary);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+}
+
+.value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.score-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.trend.down {
+    font-size: 0.75rem;
+    color: var(--destructive);
+    font-weight: 600;
+}
+
+.gap-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+}
+
+.gap-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.gap-header {
+    display: grid;
+    grid-template-columns: 2fr 3fr 1fr;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+}
+
+.gap-row {
+    display: grid;
+    grid-template-columns: 2fr 3fr 1fr;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+}
+
+.gap-row:last-child {
+    border-bottom: none;
+}
+
+.skill-name-col {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+}
+
+.dual-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.progress-bg {
+    height: 8px;
+    background-color: var(--border);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-current {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 4px;
+}
+
+.progress-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--destructive);
+    box-shadow: 0 0 8px var(--destructive);
+    z-index: 10;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.status-badge.matching {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.status-badge.gap {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.status-badge.critical-gap {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--destructive);
+}
+
+.insights-card .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.insight-item {
+    display: flex;
+    gap: 1rem;
+}
+
+.insight-icon {
+    width: 36px;
+    height: 36px;
+    background-color: var(--input);
+    color: var(--primary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.insight-content h4 {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.insight-content p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+@media (max-width: 1100px) {
+    .gap-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analyzer-summary-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.viewing-other-role-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-md);
+    color: #3b82f6;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}

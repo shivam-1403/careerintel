@@ -1,0 +1,113 @@
+﻿import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ScrollToTop from "./components/utils/ScrollToTop";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { ToastProvider } from "./components/ui/Toast";
+
+// Layouts
+import MainLayout from './components/layout/MainLayout';
+import BaseLayout from './components/layout/BaseLayout';
+
+// Pages
+import Landing from './pages/Landing';
+import Login from './pages/Auth/Login';
+import Signup from './pages/Auth/Signup';
+import ForgotPassword from './pages/Auth/ForgotPassword';
+import Dashboard from './pages/Student/Dashboard';
+import Profile from './pages/Student/Profile';
+import ResumeAnalyzer from './pages/Student/ResumeAnalyzer';
+import CareerRecommendations from './pages/Student/CareerRecommendations';
+import SkillGapAnalyzer from './pages/Student/SkillGapAnalyzer';
+import LearningPath from './pages/Student/LearningPath';
+import ProgressTracker from './pages/Student/ProgressTracker';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+
+function App() {
+  return (
+    <Router>
+      <ToastProvider>
+        <ScrollToTop />
+        <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<BaseLayout><Landing /></BaseLayout>} />
+        <Route path="/login" element={<BaseLayout><Login /></BaseLayout>} />
+        <Route path="/signup" element={<BaseLayout><Signup /></BaseLayout>} />
+        <Route path="/forgot-password" element={<BaseLayout><ForgotPassword /></BaseLayout>} />
+
+        {/* Client Side Routes - Student */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <MainLayout><Dashboard /></MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <MainLayout><Profile /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/resume-analyzer" 
+          element={
+            <ProtectedRoute>
+              <MainLayout><ResumeAnalyzer /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/career-recommendations" 
+          element={
+            <ProtectedRoute>
+              <MainLayout><CareerRecommendations /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/skill-gap" 
+          element={
+            <ProtectedRoute>
+              <MainLayout><SkillGapAnalyzer /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/learning-path" 
+          element={
+            <ProtectedRoute>
+              <MainLayout><LearningPath /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/progress" 
+          element={
+            <ProtectedRoute>
+              <MainLayout><ProgressTracker /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Admin Routes */}
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute>
+              <MainLayout><AdminDashboard /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* 404 Redirect */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      </ToastProvider>
+    </Router>
+  );
+}
+
+export default App;

@@ -1,0 +1,429 @@
+﻿import React, { useState, useEffect, useRef } from 'react';
+import { User, Mail, Tag, Save, Camera } from 'lucide-react';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import { useToast } from '../../components/ui/Toast';
+import './Profile.css';
+
+const Profile = () => {
+    const toast = useToast();
+    const fileInputRef = useRef(null);
+
+    const [skills, setSkills] = useState(['React','JavaScript','Node.js','Python','SQL']);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [selectedSkill, setSelectedSkill] = useState(null);
+    const [profileImage, setProfileImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+
+    const [formData, setFormData] = useState({
+        first_name: "",
+        last_name: "",
+        email: ""
+    });
+
+    // FETCH USER DATA
+    useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const userRes = await fetch("http://127.0.0.1:8000/user/profile", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const userData = await userRes.json();
+
+            setFormData({
+                first_name: userData.first_name || "",
+                last_name: userData.last_name || "",
+                email: userData.email || ""
+            });
+
+            // Set profile image if exists
+            if (userData.profile_image) {
+                setProfileImage(userData.profile_image);
+            }
+
+            const skillsRes = await fetch("http://127.0.0.1:8000/skills", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const skillsData = await skillsRes.json();
+            setSkills(skillsData);
+
+        } catch (err) {
+            console.error("Failed to fetch profile data", err);
+        }
+    };
+
+    fetchData();
+}, []);
+
+
+
+    // HANDLE INPUT CHANGE
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    // SAVE PROFILE TO DATABASE
+    const handleSave = async () => {
+        try {
+            const res = await fetch("http://127.0.0.1:8000/user/update", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                toast.error(data.detail || "Failed to update profile");
+                return;
+            }
+
+            localStorage.setItem("token", data.access_token);
+            toast.success(data.message || "Profile updated successfully");
+
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update profile");
+        }
+    };
+
+    const searchSkills = async (query) => {
+        if (!query) {
+            setSuggestions([]);
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `http://127.0.0.1:8000/skills/search?query=${query}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    }
+                }
+            );
+
+            const data = await res.json();
+            setSuggestions(data);
+        } catch (err) {
+            console.error("Search failed", err);
+        }
+    };
+
+    // SKILLS
+    const addSkill = async (e) => {
+        e.preventDefault();
+
+        if (!selectedSkill) {
+            toast.error("Please select a skill from dropdown");
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                "http://127.0.0.1:8000/skills/add",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    },
+                    body: JSON.stringify({
+                        skill_id: selectedSkill.id
+                    })
+                }
+            );
+
+            if (!res.ok) {
+                const data = await res.json();
+                toast.error(data.detail);
+                return;
+            }
+
+            setSkills([...skills, selectedSkill.name]);
+            setSearchQuery("");
+            setSelectedSkill(null);
+            toast.success("Skill added successfully");
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const removeSkill = async (skillToRemove) => {
+
+        await fetch(`http://127.0.0.1:8000/skills/remove?name=${skillToRemove}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+        });
+
+        setSkills(skills.filter(skill => skill !== skillToRemove));
+    };
+
+    // PHOTO UPLOAD HANDLERS
+    const handlePhotoClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handlePhotoChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed");
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("File too large. Maximum size is 5MB");
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const token = localStorage.getItem("token");
+            const res = await fetch("http://127.0.0.1:8000/user/upload-photo", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                toast.error(data.detail || "Failed to upload photo");
+                return;
+            }
+
+            // Update UI with new image - add timestamp to force refresh
+            const imageUrl = `${data.image_url}?t=${Date.now()}`;
+            setProfileImage(imageUrl);
+            toast.success("Profile photo updated successfully");
+
+            localStorage.setItem("profile_image", data.image_url);
+            
+        } catch (err) {
+            console.error("Upload error:", err);
+            toast.error("Failed to upload photo");
+        } finally {
+            setIsUploading(false);
+            // Reset input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
+
+
+    return (
+        <div className="profile-page">
+
+            <div className="page-header">
+                <h1 className="page-title">Personal Profile</h1>
+                <p className="page-subtitle">Manage your information and career preferences.</p>
+            </div>
+
+            <div className="profile-grid">
+
+                {/* LEFT PANEL */}
+                <div className="profile-left">
+                    <Card className="profile-photo-card">
+
+                        <div className="profile-photo-wrapper">
+                            <div className="profile-photo" onClick={handlePhotoClick} style={{ cursor: 'pointer' }}>
+                                {profileImage ? (
+                                    <img
+                                        src={profileImage}
+                                        alt="Profile"
+                                        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    <>
+                                        {formData.first_name?.charAt(0)}
+                                        {formData.last_name?.charAt(0)}
+                                    </>
+                                )}
+                                <div className="photo-overlay">
+                                    <Camera size={20} />
+                                </div>
+                            </div>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handlePhotoChange}
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                style={{ display: 'none' }}
+                            />
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handlePhotoClick}
+                                disabled={isUploading}
+                            >
+                                {isUploading ? "Uploading..." : "Change Photo"}
+                            </Button>
+                        </div>
+
+                        <div className="profile-status">
+                            <h3>{formData.first_name} {formData.last_name}</h3>
+                            <p>Student</p>
+                            <div className="badge success">Active Learner</div>
+                        </div>
+
+                    </Card>
+
+                    <Card title="Quick Stats" className="mt-6">
+                        <div className="profile-stats">
+
+                            <div className="profile-stat-item">
+                                <span className="ps-label">Skills</span>
+                                <span className="ps-value">{skills.length}</span>
+                            </div>
+
+                            <div className="profile-stat-item">
+                                <span className="ps-label">Courses Done</span>
+                                <span className="ps-value">12</span>
+                            </div>
+
+                            <div className="profile-stat-item">
+                                <span className="ps-label">Assessments</span>
+                                <span className="ps-value">4</span>
+                            </div>
+
+                        </div>
+                    </Card>
+                </div>
+
+                {/* RIGHT PANEL */}
+                <div className="profile-right">
+                    <Card title="Basic Information">
+
+                        <form className="profile-form" onSubmit={(e)=>e.preventDefault()}>
+
+                            <div className="form-row">
+
+                                <div className="form-group">
+                                    <label><User size={16}/> First Name</label>
+                                    <input
+                                        name="first_name"
+                                        value={formData.first_name}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label><User size={16}/> Last Name</label>
+                                    <input
+                                        name="last_name"
+                                        value={formData.last_name}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+
+                            </div>
+
+                            <div className="form-group">
+                                <label><Mail size={16}/> Email</label>
+                                <input
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            <div className="section-divider"></div>
+
+                            {/* SKILLS */}
+                            <div className="form-group">
+                                <label><Tag size={16}/> Skills</label>
+
+                                <div className="tag-input-container">
+
+                                    <div className="tags-wrapper">
+                                        {skills.map(skill => (
+                                            <span key={skill} className="skill-tag">
+                                                {skill}
+                                                <button type="button" onClick={()=>removeSkill(skill)}>&times;</button>
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    <div className="tag-add-row">
+                                        <div className="skill-search-wrapper">
+
+                                            <input
+                                                placeholder="Search skill..."
+                                                value={searchQuery}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setSearchQuery(value);
+                                                    searchSkills(value);
+                                                    setSelectedSkill(null);
+                                                }}
+                                            />
+
+                                            {suggestions.length > 0 && (
+                                                <div className="skill-dropdown">
+                                                    {suggestions.map(skill => (
+                                                        <div
+                                                            key={skill.id}
+                                                            className="skill-option"
+                                                            onClick={() => {
+                                                                setSelectedSkill(skill);
+                                                                setSearchQuery(skill.name);
+                                                                setSuggestions([]);
+                                                            }}
+                                                        >
+                                                            {skill.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                        </div>
+
+                                        <Button variant="secondary" size="sm" onClick={addSkill}>
+                                            Add
+                                        </Button>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div className="form-actions">
+                                <Button onClick={handleSave}>
+                                    <Save size={18}/> Save Changes
+                                </Button>
+                            </div>
+
+                        </form>
+                    </Card>
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
+export default Profile;

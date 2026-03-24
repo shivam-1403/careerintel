@@ -1,0 +1,149 @@
+.progress-tracker {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.progress-overview-grid {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.overview-card .card-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 2rem 1.5rem;
+}
+
+.ov-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.ov-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ov-icon.green {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.ov-icon.purple {
+    background-color: rgba(79, 70, 229, 0.1);
+    color: var(--primary);
+}
+
+.ov-icon.blue {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.ov-label {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    font-weight: 500;
+}
+
+.ov-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.ov-divider {
+    width: 1px;
+    height: 40px;
+    background-color: var(--border);
+}
+
+.chart-wrapper {
+    margin-top: 1rem;
+}
+
+.progress-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.roadmap-progress-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.rp-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.rp-bar {
+    height: 8px;
+    background-color: var(--input);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rp-fill {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 4px;
+}
+
+.milestone-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.ms-item {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.ms-marker {
+    color: var(--primary);
+}
+
+.ms-content h4 {
+    font-size: 0.875rem;
+    margin-bottom: 0.125rem;
+}
+
+.ms-content p {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+}
+
+.ms-item.locked {
+    opacity: 0.5;
+}
+
+.ms-item.locked .ms-marker {
+    color: var(--muted);
+}
+
+@media (max-width: 768px) {
+    .overview-card .card-content {
+        flex-direction: column;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+
+    .ov-divider {
+        display: none;
+    }
+
+    .progress-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}

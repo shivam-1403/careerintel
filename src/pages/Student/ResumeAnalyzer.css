@@ -1,0 +1,482 @@
+.resume-analyzer {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.analyzer-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
+    margin-top: 2rem;
+    align-items: start;
+}
+
+.analyzer-right {
+    align-self: start;
+}
+
+.analyzer-right .card {
+    height: auto !important;
+}
+
+.career-dropdown {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    background-color: white;
+    transition: border 0.2s ease;
+}
+
+.career-dropdown:focus {
+    border-color: #5b5bd6;
+    outline: none;
+}
+
+.resume-controls {
+    padding: 16px;
+}
+
+.upload-card .card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.upload-area {
+    flex: 1;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem;
+    transition: all var(--transition-normal);
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    background-color: var(--ring);
+}
+
+.upload-icon {
+    width: 80px;
+    height: 80px;
+    background-color: var(--input);
+    color: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.upload-area h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-area p {
+    color: var(--muted-foreground);
+    margin-bottom: 2rem;
+}
+
+.file-hint {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    margin-top: 1rem;
+}
+
+.spinning {
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.file-info h4 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.file-info span {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+}
+
+.blurred {
+    filter: blur(4px);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.readiness-label {
+    text-align: center;
+    font-weight: 600;
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.score-breakdown {
+    margin-bottom: 16px;
+}
+
+.resume-suggestions {
+    margin-top: 16px;
+}
+
+.resume-suggestions h4 {
+    margin-bottom: 12px;
+}
+
+.insight-card {
+    padding: 1rem;
+    background-color: var(--input);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    border-left: 3px solid var(--border);
+}
+
+.insight-card:last-child {
+    margin-bottom: 0;
+}
+
+.insight-card.insight-positive {
+    border-left-color: var(--success);
+    background-color: rgba(16, 185, 129, 0.05);
+}
+
+.insight-card.insight-warning {
+    border-left-color: var(--warning);
+    background-color: rgba(245, 158, 11, 0.05);
+}
+
+.insight-card.insight-improvement {
+    border-left-color: var(--destructive);
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.insight-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.insight-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.insight-positive .insight-badge {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.insight-warning .insight-badge {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+}
+
+.insight-improvement .insight-badge {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--destructive);
+}
+
+.insight-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--card-foreground);
+}
+
+.insight-message {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.resume-suggestions ul {
+    margin: 0;
+    padding-left: 18px;   /* control bullet indentation here */
+}
+
+.resume-suggestions li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.resume-content-placeholder {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.skeleton-line {
+    height: 12px;
+    background-color: var(--input);
+    border-radius: 6px;
+    width: 100%;
+}
+
+.skeleton-line.title {
+    height: 20px;
+    width: 40%;
+    background-color: var(--border);
+}
+
+.skeleton-line.short {
+    width: 60%;
+}
+
+.score-container {
+    display: flex;
+    justify-content: center;
+    padding: 0.75rem 0;
+}
+
+.score-circle {
+    width: 150px;
+    position: relative;
+    text-align: center;
+}
+
+.circular-chart {
+    display: block;
+    margin: 0 auto;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: var(--input);
+    stroke-width: 2.8;
+}
+
+.circle {
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.6s ease;
+}
+
+.percentage {
+    fill: var(--card-foreground);
+    font-size: 0.5rem;
+    font-weight: 800;
+    text-anchor: middle;
+}
+
+.score-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    margin-top: 0.5rem;
+}
+
+.skills-table {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.career-match-row {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+}
+
+.career-match-row + .career-match-row {
+    margin-top: 0.5rem;
+}
+
+.job-description-input {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 0.5rem;
+    resize: vertical;
+}
+
+.score-breakdown p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.score-breakdown p {
+  margin: 6px 0;
+  font-size: 0.9rem;
+}
+
+.score-breakdown strong {
+  color: #1f2937;
+}
+
+.tags-wrapper {
+    margin-top: 0.5rem;
+}
+
+.career-match-row:hover {
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.career-match-row:last-child {
+    border-bottom: none;
+}
+
+.career-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.career-title {
+    font-size: 0.95rem;
+}
+
+.career-score {
+    font-size: 0.85rem;
+    color: var(--primary);
+}
+
+.top-careers {
+    margin-top: 1rem;
+}
+
+.top-careers h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted-foreground);
+    margin-bottom: 1rem;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.skill-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.skill-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.skill-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.skill-cat {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+}
+
+.status-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.status-tag.strong {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.status-tag.moderate {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.status-tag.weak {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--destructive);
+}
+
+.keyword-tag {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 500;
+     margin: 0 0.4rem 0.3rem 0;
+}
+
+.keyword-tag.missing {
+    background-color: var(--input);
+    color: var(--muted);
+    border: 1px dashed var(--border);
+}
+
+.suggestion-list {
+    list-style: none;
+}
+
+.suggestion-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.blurred {
+    filter: blur(4px);
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+@media (max-width: 1024px) {
+    .analyzer-grid {
+        grid-template-columns: 1fr;
+    }
+}
