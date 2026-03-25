@@ -92,14 +92,6 @@ Keep it encouraging but honest. No bullet points, just natural paragraphs."""
         return None
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 def extract_text_from_pdf(file):
     text = ""
     with pdfplumber.open(file.file) as pdf:
