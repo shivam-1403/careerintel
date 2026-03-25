@@ -1,18 +1,6 @@
 import re
-import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
-
-# -------------------- NLP MODEL --------------------
-import spacy
-import os
-
-try:
-    nlp = spacy.load("en_core_web_sm")
-except:
-    os.system("python -m spacy download en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
 
 
 # -------------------- STOPWORDS --------------------
@@ -41,28 +29,28 @@ def clean_text(text):
     return re.sub(r'\s+', ' ', text.lower())
 
 
-# -------------------- ADVANCED KEYWORD EXTRACTION --------------------
+# -------------------- KEYWORD EXTRACTION (NO SPACY) --------------------
 def extract_keywords(text):
-    doc = nlp(text.lower())
-    keywords = []
+    text = text.lower()
 
-    for token in doc:
-        # Keep only nouns & proper nouns
-        if token.pos_ in ["NOUN", "PROPN"]:
-            word = token.text.strip()
+    # Extract words
+    words = re.findall(r'\b[a-zA-Z]{3,}\b', text)
 
-            if (
-                word not in TECH_STOPWORDS and
-                len(word) > 3 and
-                not word.isdigit()
-            ):
-                keywords.append(word)
+    keywords = [
+        word for word in words
+        if word not in TECH_STOPWORDS
+    ]
 
-    # Detect 2-word phrases (like machine learning)
+    # Detect 2-word phrases
     phrases = []
-    for chunk in doc.noun_chunks:
-        phrase = chunk.text.lower().strip()
-        if len(phrase.split()) == 2:
+    tokens = text.split()
+
+    for i in range(len(tokens) - 1):
+        phrase = tokens[i] + " " + tokens[i + 1]
+        if (
+            tokens[i] not in TECH_STOPWORDS and
+            tokens[i + 1] not in TECH_STOPWORDS
+        ):
             phrases.append(phrase)
 
     return list(set(keywords + phrases))
@@ -77,7 +65,6 @@ def keyword_match_score(resume_text, jd_text):
     missing = []
 
     for kw in jd_keywords:
-        # safer boundary matching
         pattern = r'\b' + re.escape(kw) + r'\b'
         if re.search(pattern, resume_text):
             matched.append(kw)
@@ -132,8 +119,7 @@ def readability_score(resume_text):
         return 90
 
 
-# -------------------- MAIN ATS CALCULATION --------------------
-# -------------------- RESUME QUALITY CALCULATION --------------------
+# -------------------- RESUME QUALITY --------------------
 def calculate_resume_quality(resume_text):
 
     resume_text = clean_text(resume_text)
