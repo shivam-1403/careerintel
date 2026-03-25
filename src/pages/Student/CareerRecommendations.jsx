@@ -11,7 +11,7 @@ const CareerRecommendations = () => {
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
-                const res = await fetch("http://127.0.0.1:8000/career/recommend", {
+                const res = await fetch("https://careerintel-w10f.onrender.com/career/recommend", {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`
                     }

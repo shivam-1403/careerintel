@@ -28,7 +28,7 @@ const Profile = () => {
         try {
             const token = localStorage.getItem("token");
 
-            const userRes = await fetch("http://127.0.0.1:8000/user/profile", {
+            const userRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -45,7 +45,7 @@ const Profile = () => {
                 setProfileImage(userData.profile_image);
             }
 
-            const skillsRes = await fetch("http://127.0.0.1:8000/skills", {
+            const skillsRes = await fetch("https://careerintel-w10f.onrender.com/skills", {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -73,7 +73,7 @@ const Profile = () => {
     // SAVE PROFILE TO DATABASE
     const handleSave = async () => {
         try {
-            const res = await fetch("http://127.0.0.1:8000/user/update", {
+            const res = await fetch("https://careerintel-w10f.onrender.com/user/update", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -106,7 +106,7 @@ const Profile = () => {
 
         try {
             const res = await fetch(
-                `http://127.0.0.1:8000/skills/search?query=${query}`,
+                `https://careerintel-w10f.onrender.com/skills/search?query=${query}`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -132,7 +132,7 @@ const Profile = () => {
 
         try {
             const res = await fetch(
-                "http://127.0.0.1:8000/skills/add",
+                "https://careerintel-w10f.onrender.com/skills/add",
                 {
                     method: "POST",
                     headers: {
@@ -163,7 +163,7 @@ const Profile = () => {
 
     const removeSkill = async (skillToRemove) => {
 
-        await fetch(`http://127.0.0.1:8000/skills/remove?name=${skillToRemove}`, {
+        await fetch(`https://careerintel-w10f.onrender.com/skills/remove?name=${skillToRemove}`, {
             method: "DELETE",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -201,7 +201,7 @@ const Profile = () => {
             formData.append("file", file);
 
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:8000/user/upload-photo", {
+            const res = await fetch("https://careerintel-w10f.onrender.com/user/upload-photo", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -222,7 +222,7 @@ const Profile = () => {
             toast.success("Profile photo updated successfully");
 
             localStorage.setItem("profile_image", data.image_url);
-            
+
         } catch (err) {
             console.error("Upload error:", err);
             toast.error("Failed to upload photo");

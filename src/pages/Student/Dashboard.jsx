@@ -14,7 +14,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import './Dashboard.css';
 
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = 'https://careerintel-w10f.onrender.com';
 
 const authHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem('token')}`

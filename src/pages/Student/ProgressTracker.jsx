@@ -101,7 +101,7 @@ const ProgressTracker = () => {
                 }
 
                 // Fetch user profile to get target role
-                const profileRes = await fetch("http://127.0.0.1:8000/user/profile", {
+                const profileRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -129,7 +129,7 @@ const ProgressTracker = () => {
                 }
 
                 // Fetch role details to get required skills
-                const roleRes = await fetch(`http://127.0.0.1:8000/roles/${targetRoleId}`, {
+                const roleRes = await fetch(`https://careerintel-w10f.onrender.com/roles/${targetRoleId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -143,7 +143,7 @@ const ProgressTracker = () => {
                 }
 
                 // Fetch user's skills
-                const skillsRes = await fetch("http://127.0.0.1:8000/user/skills", {
+                const skillsRes = await fetch("https://careerintel-w10f.onrender.com/user/skills", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Upload, FileText, RefreshCcw, Sparkles } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -19,12 +19,12 @@ const ResumeAnalyzer = () => {
                 const token = localStorage.getItem("token");
 
                 // Fetch roles
-                const rolesRes = await fetch("http://127.0.0.1:8000/roles");
+                const rolesRes = await fetch("https://careerintel-w10f.onrender.com/roles");
                 const rolesData = await rolesRes.json();
                 setRoles(rolesData);
 
                 // Fetch user's target role
-                const profileRes = await fetch("http://127.0.0.1:8000/user/profile", {
+                const profileRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const profile = await profileRes.json();
@@ -59,7 +59,7 @@ const ResumeAnalyzer = () => {
 
         try {
             const res = await fetch(
-                `http://127.0.0.1:8000/resume/analyze/${selectedRole}`,
+                `https://careerintel-w10f.onrender.com/resume/analyze/${selectedRole}`,
                 {
                     method: "POST",
                     headers: {

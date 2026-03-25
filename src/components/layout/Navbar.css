@@ -121,6 +121,13 @@
     color: var(--muted-foreground);
 }
 
+.avatar-loader {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #e0e0e0;
+}
+
 @media (max-width: 768px) {
     .mobile-menu-btn {
         display: block;

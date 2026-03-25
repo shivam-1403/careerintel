@@ -7,39 +7,34 @@ const Navbar = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
-            const token = localStorage.getItem("token");
+            try {
+                const token = localStorage.getItem("token");
 
-            console.log("Stored token:", token); // keep this for debug
+                const res = await fetch(
+                    "https://careerintel-w10f.onrender.com/user/profile",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
-            if (!token) return;
+                const data = await res.json();
 
-           const res = await fetch("http://127.0.0.1:8000/user/profile", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            const data = await res.json();   // ✅ FIRST parse
-
-            if (data.profile_image) {
-                setProfileImage(data.profile_image);
-            }
-            console.log("Profile response:", data);
-
-            if (res.ok) {
                 setUser(data);
+                setProfileImage(data.profile_image);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchUser();
-    }, []);
-
-    useEffect(() => {
-        const img = localStorage.getItem("profile_image");
-        if (img) setProfileImage(img);
     }, []);
 
     return (
@@ -65,19 +60,21 @@ const Navbar = ({ toggleSidebar }) => {
                   style={{ cursor: "pointer" }}
                 >
                   <div className="user-avatar">
-                    {profileImage ? (
+                    {loading ? (
+                        <div className="avatar-loader"></div>
+                    ) : profileImage ? (
                         <img
-                        src={profileImage}
-                        alt="profile"
-                        className="nav-profile-img"
+                            src={profileImage}
+                            alt="profile"
+                            className="nav-profile-img"
                         />
                     ) : (
                         <>
-                        {user?.first_name?.charAt(0)}
-                        {user?.last_name?.charAt(0)}
+                            {user?.first_name?.charAt(0)}
+                            {user?.last_name?.charAt(0)}
                         </>
                     )}
-                    </div>
+                </div>
                   <div className="user-info">
                     <span className="user-name">
                       {user ? `${user.first_name} ${user.last_name}` : "Loading..."}

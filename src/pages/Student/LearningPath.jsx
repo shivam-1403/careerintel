@@ -20,7 +20,7 @@ const LearningPath = () => {
         const fetchTargetRole = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await fetch("http://127.0.0.1:8000/user/profile", {
+                const response = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const profile = await response.json();
@@ -42,7 +42,7 @@ const LearningPath = () => {
 
                 // 1️⃣ get user's target role first, then check URL
                 const profileRes = await fetch(
-                    "http://127.0.0.1:8000/user/profile",
+                    "https://careerintel-w10f.onrender.com/user/profile",
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }
@@ -60,7 +60,7 @@ const LearningPath = () => {
 
                 // 2️⃣ get skill gap for that role (for soft skills display)
                 const gapRes = await fetch(
-                    `http://127.0.0.1:8000/career/gap/${roleIdToUse}`,
+                    `https://careerintel-w10f.onrender.com/career/gap/${roleIdToUse}`,
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }
@@ -71,7 +71,7 @@ const LearningPath = () => {
 
                 // 3️⃣ generate roadmap from backend
                 const roadmapRes = await fetch(
-                    `http://127.0.0.1:8000/roadmap/generate/${roleIdToUse}`,
+                    `https://careerintel-w10f.onrender.com/roadmap/generate/${roleIdToUse}`,
                     {
                         method: "POST",
                         headers: { Authorization: `Bearer ${token}` }
@@ -98,7 +98,7 @@ const LearningPath = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await fetch(
-                `http://127.0.0.1:8000/user/target-role/${roleIdFromURL}`,
+                `https://careerintel-w10f.onrender.com/user/target-role/${roleIdFromURL}`,
                 {
                     method: "PUT",
                     headers: { Authorization: `Bearer ${token}` }
