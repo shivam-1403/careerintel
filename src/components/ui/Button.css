@@ -64,3 +64,29 @@
     padding: 0.4rem 0.8rem;
     font-size: 0.75rem;
 }
+
+.btn-loading {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.btn-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

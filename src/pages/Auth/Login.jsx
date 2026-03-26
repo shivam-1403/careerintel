@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import './Auth.css';
@@ -8,46 +8,57 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+        e.preventDefault();
+        setError("");
+        setLoading(true);
 
-    try {
-        const response = await fetch("https://careerintel-w10f.onrender.com/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email,
-                password,
-            }),
-        });
+        try {
+            const response = await fetch("https://careerintel-w10f.onrender.com/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        console.log("LOGIN RESPONSE:", data); // DEBUG LINE
+            console.log("LOGIN RESPONSE:", data);
 
-        if (!response.ok) {
-            setError(data.detail || "Invalid email or password");
-            return;
+            if (!response.ok) {
+                setError(data.detail || "Invalid email or password");
+                setLoading(false);
+                return;
+            }
+
+            localStorage.setItem("token", data.access_token);
+            console.log("Stored token:", localStorage.getItem("token"));
+
+            // Fetch user profile and store in localStorage
+            const profileRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
+                headers: { Authorization: `Bearer ${data.access_token}` }
+            });
+            const userData = await profileRes.json();
+            localStorage.setItem("user", JSON.stringify(userData));
+            if (userData.profile_image) {
+                localStorage.setItem("profile_image", userData.profile_image);
+            }
+
+            navigate("/dashboard");
+
+        } catch (err) {
+            console.error(err);
+            setError("Server error. Try again later.");
+        } finally {
+            setLoading(false);
         }
-
-        // ✅ STORE TOKEN
-        localStorage.setItem("token", data.access_token);
-
-        // confirm stored
-        console.log("Stored token:", localStorage.getItem("token"));
-
-        navigate("/dashboard");
-
-    } catch (err) {
-        console.error(err);
-        setError("Server error. Try again later.");
-    }
-};
-
+    };
 
     return (
         <div className="auth-container">
@@ -90,7 +101,7 @@ const Login = () => {
                         />
                     </div>
                     {error && <p className="auth-error">{error}</p>}
-                    <Button type="submit" size="lg" className="w-full">Login</Button>
+                    <Button type="submit" size="lg" className="w-full" loading={loading} loadingText="Logging in...">Login</Button>
                 </form>
 
                 <div className="auth-footer">

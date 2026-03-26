@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { NavLink } from 'react-router-dom';
 import {
@@ -25,6 +25,14 @@ const Sidebar = () => {
         { name: 'Progress Tracker', path: '/progress', icon: <BarChart2 size={20} /> },
     ];
 
+    const handleLogout = () => {
+        // Clear all user-related localStorage data
+        localStorage.removeItem("token");
+        localStorage.removeItem("profile_image");
+        localStorage.removeItem("user_skills");
+        navigate("/login", { replace: true });
+    };
+
     return (
         <aside className="sidebar">
             <div className="sidebar-brand">
@@ -49,12 +57,7 @@ const Sidebar = () => {
             </nav>
 
             <div className="sidebar-footer">
-                <button className="nav-link logout-btn"
-                onClick={() => {
-                    localStorage.removeItem("token");
-                    navigate("/login", { replace: true });
-
-                }}>
+                <button className="nav-link logout-btn" onClick={handleLogout}>
                     <LogOut size={20} />
                     <span>Logout</span>
                 </button>

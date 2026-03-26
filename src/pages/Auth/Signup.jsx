@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import './Auth.css';
@@ -10,41 +10,44 @@ const Signup = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = React.useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleSignup = async (e) => {
-    e.preventDefault();
-    setError("");
+        e.preventDefault();
+        setError("");
+        setLoading(true);
 
-    try {
-        const res = await fetch("https://careerintel-w10f.onrender.com/auth/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                first_name: firstName,
-                last_name: lastName,
-                email,
-                password,
-            }),
-        });
+        try {
+            const res = await fetch("https://careerintel-w10f.onrender.com/auth/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    password,
+                }),
+            });
 
-        const data = await res.json();
+            const data = await res.json();
 
-        if (!res.ok) {
-            setError(data.detail || "Signup failed");
-            return;
+            if (!res.ok) {
+                setError(data.detail || "Signup failed");
+                setLoading(false);
+                return;
+            }
+
+            localStorage.setItem("token", data.access_token);
+            navigate("/dashboard");
+
+        } catch (err) {
+            setError("Server error");
+        } finally {
+            setLoading(false);
         }
-
-        // auto login after signup
-        localStorage.setItem("token", data.access_token);
-        navigate("/dashboard");
-
-    } catch (err) {
-        setError("Server error");
-    }
-};
-
+    };
 
     return (
         <div className="auth-container">
@@ -106,7 +109,7 @@ const Signup = () => {
                         <label htmlFor="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
                     </div>
 
-                    <Button type="submit" size="lg" className="w-full">Create Account</Button>
+                    <Button type="submit" size="lg" className="w-full" loading={loading} loadingText="Creating account...">Create Account</Button>
                 </form>
 
                 <div className="auth-footer">

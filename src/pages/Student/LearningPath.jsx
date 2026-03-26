@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Play, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, ChevronDown, Target, Info } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import Loader from '../../components/ui/Loader';
 import './LearningPath.css';
 
 const LearningPath = () => {
@@ -129,7 +130,15 @@ const LearningPath = () => {
     const hasTargetRole = roleIdFromURL || targetRoleId;
 
     if (isLoading) {
-        return <p>Loading your learning roadmap...</p>;
+        return (
+            <div className="learning-path">
+                <div className="page-header">
+                    <h1 className="page-title">Personalized Learning Roadmap</h1>
+                    <p className="page-subtitle">Your step-by-step journey to becoming a <strong>{career || 'your target career'}</strong>.</p>
+                </div>
+                <Loader message="Generating your personalized roadmap..." size="lg" />
+            </div>
+        );
     }
 
     if (hasAttemptedFetch && !hasTargetRole) {
@@ -162,7 +171,15 @@ const LearningPath = () => {
     }
 
     if (!roadmap.length && !gapData) {
-        return <p>Loading your learning roadmap...</p>;
+        return (
+            <div className="learning-path">
+                <div className="page-header">
+                    <h1 className="page-title">Personalized Learning Roadmap</h1>
+                    <p className="page-subtitle">Your step-by-step journey to becoming a <strong>{career || 'your target career'}</strong>.</p>
+                </div>
+                <Loader message="Generating your personalized roadmap..." size="lg" />
+            </div>
+        );
     }
 
     // Transform backend roadmap to UI format

@@ -1,20 +1,23 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User, Mail, Tag, Save, Camera } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
+import Loader from '../../components/ui/Loader';
 import './Profile.css';
 
 const Profile = () => {
     const toast = useToast();
     const fileInputRef = useRef(null);
 
-    const [skills, setSkills] = useState(['React','JavaScript','Node.js','Python','SQL']);
+    // Initialize with empty array to avoid flashing
+    const [skills, setSkills] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [selectedSkill, setSelectedSkill] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const [formData, setFormData] = useState({
         first_name: "",
@@ -24,41 +27,46 @@ const Profile = () => {
 
     // FETCH USER DATA
     useEffect(() => {
-    const fetchData = async () => {
-        try {
-            const token = localStorage.getItem("token");
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem("token");
 
-            const userRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+                const userRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
 
-            const userData = await userRes.json();
+                const userData = await userRes.json();
 
-            setFormData({
-                first_name: userData.first_name || "",
-                last_name: userData.last_name || "",
-                email: userData.email || ""
-            });
+                setFormData({
+                    first_name: userData.first_name || "",
+                    last_name: userData.last_name || "",
+                    email: userData.email || ""
+                });
 
-            // Set profile image if exists
-            if (userData.profile_image) {
-                setProfileImage(userData.profile_image);
+                // Set profile image if exists - ensure full URL
+                if (userData.profile_image) {
+                    setProfileImage(userData.profile_image);
+                    localStorage.setItem("profile_image", userData.profile_image);
+                }
+
+                const skillsRes = await fetch("https://careerintel-w10f.onrender.com/skills", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                const skillsData = await skillsRes.json();
+                setSkills(skillsData || []);
+                localStorage.setItem("user_skills", JSON.stringify(skillsData || []));
+
+            } catch (err) {
+                console.error("Failed to fetch profile data", err);
+            } finally {
+                setLoading(false);
             }
+        };
 
-            const skillsRes = await fetch("https://careerintel-w10f.onrender.com/skills", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            const skillsData = await skillsRes.json();
-            setSkills(skillsData);
-
-        } catch (err) {
-            console.error("Failed to fetch profile data", err);
-        }
-    };
-
-    fetchData();
-}, []);
+        fetchData();
+    }, []);
 
 
 
@@ -151,7 +159,9 @@ const Profile = () => {
                 return;
             }
 
-            setSkills([...skills, selectedSkill.name]);
+            const newSkills = [...skills, selectedSkill.name];
+            setSkills(newSkills);
+            localStorage.setItem("user_skills", JSON.stringify(newSkills));
             setSearchQuery("");
             setSelectedSkill(null);
             toast.success("Skill added successfully");
@@ -170,7 +180,9 @@ const Profile = () => {
             }
         });
 
-        setSkills(skills.filter(skill => skill !== skillToRemove));
+        const newSkills = skills.filter(skill => skill !== skillToRemove);
+        setSkills(newSkills);
+        localStorage.setItem("user_skills", JSON.stringify(newSkills));
     };
 
     // PHOTO UPLOAD HANDLERS
@@ -216,12 +228,20 @@ const Profile = () => {
                 return;
             }
 
-            // Update UI with new image - add timestamp to force refresh
-            const imageUrl = `${data.image_url}?t=${Date.now()}`;
+            // Update UI with new image - ensure full URL
+            const imageUrl = data.image_url || data.profile_image;
             setProfileImage(imageUrl);
-            toast.success("Profile photo updated successfully");
+            localStorage.setItem("profile_image", imageUrl);
 
-            localStorage.setItem("profile_image", data.image_url);
+            // Also update user in localStorage
+            const storedUser = localStorage.getItem("user");
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                userData.profile_image = imageUrl;
+                localStorage.setItem("user", JSON.stringify(userData));
+            }
+
+            toast.success("Profile photo updated successfully");
 
         } catch (err) {
             console.error("Upload error:", err);
@@ -235,6 +255,25 @@ const Profile = () => {
         }
     };
 
+    // Show loader while fetching initial data
+    if (loading) {
+        return (
+            <div className="profile-page">
+                <div className="page-header">
+                    <h1 className="page-title">Personal Profile</h1>
+                    <p className="page-subtitle">Manage your information and career preferences.</p>
+                </div>
+                <Loader message="Loading profile..." size="lg" />
+            </div>
+        );
+    }
+
+    // Get initials for fallback avatar
+    const getInitials = () => {
+        const first = formData.first_name?.charAt(0) || "";
+        const last = formData.last_name?.charAt(0) || "";
+        return first + last;
+    };
 
     return (
         <div className="profile-page">
@@ -257,12 +296,14 @@ const Profile = () => {
                                         src={profileImage}
                                         alt="Profile"
                                         style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            // Fallback to initials if image fails
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling?.classList.remove('hidden');
+                                        }}
                                     />
                                 ) : (
-                                    <>
-                                        {formData.first_name?.charAt(0)}
-                                        {formData.last_name?.charAt(0)}
-                                    </>
+                                    <span className="avatar-initials">{getInitials()}</span>
                                 )}
                                 <div className="photo-overlay">
                                     <Camera size={20} />

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Bell, Menu } from 'lucide-react';
 import './Navbar.css';
@@ -9,10 +9,42 @@ const Navbar = ({ toggleSidebar }) => {
     const [profileImage, setProfileImage] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Listen for localStorage changes (e.g., after profile upload)
     useEffect(() => {
-        const fetchUser = async () => {
+        const handleStorageChange = () => {
+            const storedImage = localStorage.getItem("profile_image");
+            if (storedImage) {
+                setProfileImage(storedImage);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
+
+    useEffect(() => {
+        const initializeUser = async () => {
+            // First, check localStorage for cached user data
+            const storedUser = localStorage.getItem("user");
+            const storedImage = localStorage.getItem("profile_image");
+
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                setUser(userData);
+                if (userData.profile_image) {
+                    setProfileImage(userData.profile_image);
+                } else if (storedImage) {
+                    setProfileImage(storedImage);
+                }
+            }
+
+            // Then fetch fresh data from API
             try {
                 const token = localStorage.getItem("token");
+                if (!token) {
+                    setLoading(false);
+                    return;
+                }
 
                 const res = await fetch(
                     "https://careerintel-w10f.onrender.com/user/profile",
@@ -26,16 +58,32 @@ const Navbar = ({ toggleSidebar }) => {
                 const data = await res.json();
 
                 setUser(data);
-                setProfileImage(data.profile_image);
+                console.log("Profile image URL:", data.profile_image);
+
+                // Update localStorage with fresh data
+                localStorage.setItem("user", JSON.stringify(data));
+
+                if (data.profile_image) {
+                    setProfileImage(data.profile_image);
+                    localStorage.setItem("profile_image", data.profile_image);
+                }
             } catch (err) {
-                console.error(err);
+                console.error("Error fetching user:", err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchUser();
+        initializeUser();
     }, []);
+
+    // Get initials for fallback avatar
+    const getInitials = () => {
+        if (!user) return "";
+        const first = user.first_name?.charAt(0) || "";
+        const last = user.last_name?.charAt(0) || "";
+        return first + last;
+    };
 
     return (
         <header className="navbar">
@@ -65,16 +113,21 @@ const Navbar = ({ toggleSidebar }) => {
                     ) : profileImage ? (
                         <img
                             src={profileImage}
-                            alt="profile"
+                            alt="Profile"
                             className="nav-profile-img"
+                            onError={(e) => {
+                                // Fallback if image fails to load
+                                e.target.style.display = 'none';
+                                const initials = getInitials();
+                                if (initials) {
+                                    e.target.parentElement.innerHTML = `<span class="avatar-initials">${initials}</span>`;
+                                }
+                            }}
                         />
                     ) : (
-                        <>
-                            {user?.first_name?.charAt(0)}
-                            {user?.last_name?.charAt(0)}
-                        </>
+                        <span className="avatar-initials">{getInitials()}</span>
                     )}
-                </div>
+                  </div>
                   <div className="user-info">
                     <span className="user-name">
                       {user ? `${user.first_name} ${user.last_name}` : "Loading..."}

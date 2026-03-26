@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { Target, CheckCircle, XCircle, ArrowRight, Info } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import Loader from '../../components/ui/Loader';
 import './SkillGapAnalyzer.css';
 
 const SkillGapAnalyzer = () => {
@@ -114,7 +115,7 @@ const SkillGapAnalyzer = () => {
                     <h1 className="page-title">Skill Gap Analysis</h1>
                     <p className="page-subtitle">Analyze the distance between your current skills and your target career.</p>
                 </div>
-                <p>Loading your skill gap analysis...</p>
+                <Loader message="Loading your skill gap analysis..." size="lg" />
             </div>
         );
     }

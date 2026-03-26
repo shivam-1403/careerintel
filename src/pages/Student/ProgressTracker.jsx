@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { Award, Target, TrendingUp, CheckCircle2, Circle, Lock } from 'lucide-react';
 import Card from '../../components/ui/Card';
+import Loader from '../../components/ui/Loader';
 import './ProgressTracker.css';
 
 // Generate activity data based on user's progress
@@ -230,7 +231,7 @@ const ProgressTracker = () => {
                     <h1 className="page-title">Progress Tracker</h1>
                     <p className="page-subtitle">Monitor your learning efficiency and skill acquisition over time.</p>
                 </div>
-                <p>Loading progress data...</p>
+                <Loader message="Loading your progress data..." size="lg" />
             </div>
         );
     }

@@ -12,6 +12,7 @@ import {
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import Loader from '../../components/ui/Loader';
 import './Dashboard.css';
 
 const API_BASE = 'https://careerintel-w10f.onrender.com';
@@ -178,10 +179,15 @@ const Dashboard = () => {
     if (loading) {
         return (
             <div className="dashboard intelligence-dashboard">
-                <div className="intel-loading-wrap">
-                    <div className="intel-loading-pulse" />
-                    <p className="intel-loading">Loading your career dashboard…</p>
+                <div className="page-header intel-page-header">
+                    <h1 className="page-title intel-page-title">
+                        Welcome back
+                    </h1>
+                    <p className="page-subtitle intel-page-sub">
+                        AI-powered snapshot of your role fit, gaps, and next steps.
+                    </p>
                 </div>
+                <Loader message="Loading your career dashboard..." size="lg" />
             </div>
         );
     }

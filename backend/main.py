@@ -272,7 +272,9 @@ def upload_profile_photo(
         shutil.copyfileobj(file.file, buffer)
 
     # Return FULL public URL for frontend to display
-    full_url = f"http://127.0.0.1:8000/uploads/{filename}"
+    # Use production URL - change this if deploying to a different domain
+    BASE_URL = "https://careerintel-w10f.onrender.com"
+    full_url = f"{BASE_URL}/uploads/{filename}"
     user.profile_image = full_url
     db.commit()
 

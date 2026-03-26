@@ -1,13 +1,21 @@
 ﻿import React from 'react';
 import './Button.css';
 
-const Button = ({ children, variant = 'primary', size = 'md', className = '', ...props }) => {
+const Button = ({ children, variant = 'primary', size = 'md', className = '', loading = false, loadingText = '', disabled, ...props }) => {
     return (
         <button
-            className={`btn btn-${variant} btn-${size} ${className}`}
+            className={`btn btn-${variant} btn-${size} ${className} ${loading ? 'btn-loading' : ''}`}
+            disabled={disabled || loading}
             {...props}
         >
-            {children}
+            {loading ? (
+                <span className="btn-content">
+                    <span className="btn-spinner"></span>
+                    {loadingText || children}
+                </span>
+            ) : (
+                children
+            )}
         </button>
     );
 };
