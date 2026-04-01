@@ -789,3 +789,11 @@ def generate_roadmap(
         "score": score,
         "roadmap": roadmap_phases
     }
+    
+@app.get("/debug-files")
+def debug_files():
+    import os
+    return {
+        "cwd": os.getcwd(),
+        "files": os.listdir("uploads") if os.path.exists("uploads") else "uploads folder missing"
+    }

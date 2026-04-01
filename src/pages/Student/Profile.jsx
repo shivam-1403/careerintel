@@ -314,12 +314,17 @@ const Profile = () => {
             return;
         }
 
+        const token = localStorage.getItem("token");
+        if (!token) {
+            toast.error("Authentication required. Please login again.");
+            return;
+        }
+
         setIsUploading(true);
         try {
             const formData = new FormData();
             formData.append("file", file);
 
-            const token = localStorage.getItem("token");
             const res = await fetch("https://careerintel-w10f.onrender.com/user/upload-photo", {
                 method: "POST",
                 headers: {
@@ -328,20 +333,33 @@ const Profile = () => {
                 body: formData
             });
 
-            const data = await res.json();
-
             if (!res.ok) {
-                toast.error(data.detail || "Failed to upload photo");
+                const errorData = await res.json().catch(() => ({}));
+                toast.error(errorData.detail || "Failed to upload photo");
                 return;
             }
 
+            const data = await res.json();
+
             // Update UI with new image - ensure full URL
             const imageUrl = (data.image_url || data.profile_image);
-            const fullUrl = imageUrl.startsWith("http")
+            const fullUrl = imageUrl?.startsWith("http")
                 ? imageUrl
                 : `${BASE_URL}${imageUrl}`;
+
             setProfileImage(fullUrl);
             localStorage.setItem("profile_image", fullUrl);
+
+            // Dispatch event to update Navbar immediately (same tab)
+            window.dispatchEvent(new Event('profile-image-updated'));
+
+            // Update user state for instant UI update
+            if (user) {
+                setUser({
+                    ...user,
+                    profile_image: fullUrl
+                });
+            }
 
             // Also update user in localStorage
             const storedUser = localStorage.getItem("user");
@@ -355,7 +373,7 @@ const Profile = () => {
 
         } catch (err) {
             console.error("Upload error:", err);
-            toast.error("Failed to upload photo");
+            toast.error("Failed to upload photo. Please try again.");
         } finally {
             setIsUploading(false);
             // Reset input

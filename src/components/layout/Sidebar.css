@@ -5,7 +5,7 @@
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    position: sticky;
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 50;
@@ -92,4 +92,42 @@
 .logout-btn:hover {
     background-color: rgba(239, 68, 68, 0.05);
     color: var(--destructive);
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        transition: left 0.3s ease;
+        height: 100vh;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar-brand {
+        padding: 0 1rem;
+    }
+
+    .brand-name {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        left: -100%;
+        height: 100vh;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .nav-link {
+        padding: 1rem 0.75rem;
+        font-size: 1rem;
+    }
 }

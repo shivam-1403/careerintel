@@ -1,4 +1,7 @@
 .base-layout {
     min-height: 100vh;
     background-color: var(--background);
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }

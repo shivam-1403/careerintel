@@ -13,7 +13,7 @@ const Navbar = ({ toggleSidebar }) => {
 
     // Listen for localStorage changes (e.g., after profile upload)
     useEffect(() => {
-        const handleStorageChange = () => {
+        const updateProfileImage = () => {
             const storedImage = localStorage.getItem("profile_image");
             if (storedImage) {
                 const fullUrl = storedImage.startsWith("http")
@@ -23,17 +23,19 @@ const Navbar = ({ toggleSidebar }) => {
             }
         };
 
-        window.addEventListener('storage', handleStorageChange);
-        // Also check initial value
-        const initialImage = localStorage.getItem("profile_image");
-        if (initialImage) {
-            const fullUrl = initialImage.startsWith("http")
-                ? initialImage
-                : `${BASE_URL}${initialImage}`;
-            setProfileImage(fullUrl);
-        }
+        // Listen for storage events from other tabs
+        window.addEventListener('storage', updateProfileImage);
 
-        return () => window.removeEventListener('storage', handleStorageChange);
+        // Listen for custom event from same tab
+        window.addEventListener('profile-image-updated', updateProfileImage);
+
+        // Check initial value
+        updateProfileImage();
+
+        return () => {
+            window.removeEventListener('storage', updateProfileImage);
+            window.removeEventListener('profile-image-updated', updateProfileImage);
+        };
     }, []);
 
     useEffect(() => {
