@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Search, Bell, Menu } from 'lucide-react';
 import './Navbar.css';
 
+const BASE_URL = "https://careerintel-w10f.onrender.com";
+
 const Navbar = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
@@ -14,31 +16,28 @@ const Navbar = ({ toggleSidebar }) => {
         const handleStorageChange = () => {
             const storedImage = localStorage.getItem("profile_image");
             if (storedImage) {
-                setProfileImage(storedImage);
+                const fullUrl = storedImage.startsWith("http")
+                    ? storedImage
+                    : `${BASE_URL}${storedImage}`;
+                setProfileImage(fullUrl);
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
+        // Also check initial value
+        const initialImage = localStorage.getItem("profile_image");
+        if (initialImage) {
+            const fullUrl = initialImage.startsWith("http")
+                ? initialImage
+                : `${BASE_URL}${initialImage}`;
+            setProfileImage(fullUrl);
+        }
+
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     useEffect(() => {
-        const initializeUser = async () => {
-            // First, check localStorage for cached user data
-            const storedUser = localStorage.getItem("user");
-            const storedImage = localStorage.getItem("profile_image");
-
-            if (storedUser) {
-                const userData = JSON.parse(storedUser);
-                setUser(userData);
-                if (userData.profile_image) {
-                    setProfileImage(userData.profile_image);
-                } else if (storedImage) {
-                    setProfileImage(storedImage);
-                }
-            }
-
-            // Then fetch fresh data from API
+        const fetchUser = async () => {
             try {
                 const token = localStorage.getItem("token");
                 if (!token) {
@@ -58,14 +57,12 @@ const Navbar = ({ toggleSidebar }) => {
                 const data = await res.json();
 
                 setUser(data);
-                console.log("Profile image URL:", data.profile_image);
-
-                // Update localStorage with fresh data
-                localStorage.setItem("user", JSON.stringify(data));
 
                 if (data.profile_image) {
-                    setProfileImage(data.profile_image);
-                    localStorage.setItem("profile_image", data.profile_image);
+                    const fullUrl = data.profile_image.startsWith("http")
+                        ? data.profile_image
+                        : `${BASE_URL}${data.profile_image}`;
+                    setProfileImage(fullUrl);
                 }
             } catch (err) {
                 console.error("Error fetching user:", err);
@@ -74,7 +71,7 @@ const Navbar = ({ toggleSidebar }) => {
             }
         };
 
-        initializeUser();
+        fetchUser();
     }, []);
 
     // Get initials for fallback avatar

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
     Target,
     CheckCircle2,
+    CheckCircle,
+    Circle,
     ArrowRight,
     ChevronRight,
     Sparkles,
@@ -49,6 +51,7 @@ const Dashboard = () => {
 
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
+    const [skills, setSkills] = useState([]);
     const [stats, setStats] = useState(null);
     const [targetRole, setTargetRole] = useState(null);
     const [gap, setGap] = useState(null);
@@ -63,14 +66,16 @@ const Dashboard = () => {
             const headers = authHeaders();
 
             try {
-                const [profileRes, statsRes, targetRes, recommendRes] = await Promise.all([
+                const [profileRes, skillsRes, statsRes, targetRes, recommendRes] = await Promise.all([
                     fetch(`${API_BASE}/user/profile`, { headers }),
+                    fetch(`${API_BASE}/skills`, { headers }),
                     fetch(`${API_BASE}/dashboard/stats`, { headers }),
                     fetch(`${API_BASE}/user/target-role`, { headers }),
                     fetch(`${API_BASE}/career/recommend`, { headers })
                 ]);
 
                 const profileData = profileRes.ok ? await profileRes.json() : null;
+                const skillsData = skillsRes.ok ? await skillsRes.json() : [];
                 const statsData = statsRes.ok ? await statsRes.json() : null;
                 const targetData = targetRes.ok ? await targetRes.json() : null;
                 const recommendData = recommendRes.ok ? await recommendRes.json() : { recommendations: [] };
@@ -88,6 +93,9 @@ const Dashboard = () => {
                 if (cancelled) return;
 
                 setUser(profileData);
+                console.log("Dashboard User:", profileData);
+                setSkills(skillsData || []);
+                console.log("Dashboard Skills:", skillsData);
                 setStats(statsData);
 
                 let role = null;
@@ -123,7 +131,13 @@ const Dashboard = () => {
     const hasResume = (stats?.total_scans ?? 0) > 0;
     const hasGap = gap != null;
     const hasRoadmap = hasRoadmapForTarget(roadmaps, targetRole);
-    const hasTargetRole = Boolean(targetRole?.id);
+    // Checklist progress
+    const hasSkills = skills.length > 0;
+    const hasTargetRole = !!user?.target_role;
+
+    // User state detection
+    const skillsCount = skills.length;
+    const userState = skillsCount === 0 ? 'new' : !hasTargetRole ? 'hasSkills' : 'full';
 
     const careerReadinessScore = gap?.score ?? 0;
     const statusMeta = useMemo(
@@ -140,6 +154,27 @@ const Dashboard = () => {
         matchedSkills.length > 0 || technicalGaps.length > 0 || softGaps.length > 0;
 
     const primaryAction = useMemo(() => {
+        // STATE 1: New user (no skills) - guide to complete profile
+        if (userState === 'new') {
+            return {
+                key: 'profile',
+                title: 'Complete Your Profile',
+                detail: 'Add your skills to get personalized career recommendations and gap analysis.',
+                path: '/profile',
+                cta: 'Complete Profile'
+            };
+        }
+        // STATE 2: Has skills, no target role - explore careers
+        if (userState === 'hasSkills') {
+            return {
+                key: 'explore',
+                title: 'Explore Careers',
+                detail: 'Set a target role to see skill gaps and personalized learning paths.',
+                path: '/career-recommendations',
+                cta: 'Explore Careers'
+            };
+        }
+        // STATE 3: Full data - follow normal flow
         if (!hasResume) {
             return {
                 key: 'resume',
@@ -174,7 +209,7 @@ const Dashboard = () => {
             path: '/learning-path',
             cta: 'Continue Learning Path'
         };
-    }, [hasResume, hasGap, hasRoadmap]);
+    }, [userState, hasResume, hasGap, hasRoadmap]);
 
     if (loading) {
         return (
@@ -223,24 +258,42 @@ const Dashboard = () => {
                         </span>
                     </div>
 
-                    {!hasTargetRole ? (
+                    {/* STATE 1: New User - No skills */}
+                    {userState === 'new' ? (
                         <div className="intel-hero-empty">
                             <div className="intel-hero-empty-icon">
                                 <Target size={36} strokeWidth={1.5} />
                             </div>
-                            <h2 className="intel-hero-empty-title">Select a target role to start your career analysis</h2>
+                            <h2 className="intel-hero-empty-title">Set up your profile to get started</h2>
                             <p className="intel-hero-empty-desc">
-                                Choose a role in Resume Analyzer or your profile so we can score fit, surface gaps, and
-                                recommend paths.
+                                Add your skills in Resume Analyzer to discover career matches and see your readiness for different roles.
                             </p>
                             <div className="intel-hero-empty-actions">
-                                <Button onClick={() => navigate('/resume-analyzer')}>Choose role &amp; analyze</Button>
+                                <Button onClick={() => navigate('/profile')}>Complete Profile</Button>
                                 <Button variant="outline" onClick={() => navigate('/career-recommendations')}>
                                     Browse careers
                                 </Button>
                             </div>
                         </div>
-                    ) : (
+                    ) : /* STATE 2: Has skills, no target role */
+                    userState === 'hasSkills' ? (
+                        <div className="intel-hero-empty">
+                            <div className="intel-hero-empty-icon">
+                                <Target size={36} strokeWidth={1.5} />
+                            </div>
+                            <h2 className="intel-hero-empty-title">Select a target role to analyze your fit</h2>
+                            <p className="intel-hero-empty-desc">
+                                You have {skillsCount} skills. Choose a role to see gaps, readiness score, and personalized recommendations.
+                            </p>
+                            <div className="intel-hero-empty-actions">
+                                <Button onClick={() => navigate('/resume-analyzer')}>Choose role &amp; analyze</Button>
+                                <Button variant="outline" onClick={() => navigate('/career-recommendations')}>
+                                    Explore Careers
+                                </Button>
+                            </div>
+                        </div>
+                    ) : /* STATE 3: Full data */
+                    hasTargetRole ? (
                         <div className="intel-hero-main">
                             <div className="intel-hero-primary">
                                 <p className="intel-hero-label">Target role</p>
@@ -263,7 +316,7 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-                    )}
+                    ) : null}
                 </div>
             </section>
 
@@ -279,13 +332,32 @@ const Dashboard = () => {
                             </div>
                         }
                     >
-                        {!hasTargetRole ? (
+                        {/* STATE 1: New User - No skills */}
+                        {userState === 'new' ? (
                             <div className="intel-insight-placeholder">
                                 <p className="intel-insight-placeholder-text">
-                                    Select a target role to see matched and missing skills for that career.
+                                    No skills added yet. Add your skills to see career matches and readiness analysis.
                                 </p>
+                                <div className="intel-insight-placeholder-actions">
+                                    <Button size="sm" onClick={() => navigate('/resume-analyzer')}>
+                                        Add Skills
+                                    </Button>
+                                </div>
                             </div>
-                        ) : !hasSkillTags ? (
+                        ) : /* STATE 2: Has skills, no target role */
+                        userState === 'hasSkills' ? (
+                            <div className="intel-insight-placeholder">
+                                <p className="intel-insight-placeholder-text">
+                                    You have {skillsCount} skills. Select a target role to see gap analysis.
+                                </p>
+                                <div className="intel-insight-placeholder-actions">
+                                    <Button size="sm" onClick={() => navigate('/career-recommendations')}>
+                                        Explore Careers
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : /* STATE 3: Full data */
+                        !hasSkillTags ? (
                             <div className="intel-insight-placeholder">
                                 <p className="intel-insight-placeholder-text">
                                     Upload resume or analyze skills to see insights.
@@ -294,7 +366,7 @@ const Dashboard = () => {
                                     <Button size="sm" variant="outline" onClick={() => navigate('/resume-analyzer')}>
                                         Upload resume
                                     </Button>
-                                    <Button size="sm" onClick={() => navigate(`/skill-gap?roleId=${rec.role_id}`)}>
+                                    <Button size="sm" onClick={() => navigate(`/skill-gap?roleId=${targetRole?.id}`)}>
                                         Analyze skills
                                     </Button>
                                 </div>
@@ -337,7 +409,21 @@ const Dashboard = () => {
                     </Card>
 
                     <Card title="Priority focus" className="intel-focus-card intel-card-elevated">
-                        {topMissing.length > 0 ? (
+                        {userState === 'new' ? (
+                            <div className="intel-focus-great">
+                                <Sparkles className="intel-focus-sparkle" size={24} />
+                                <p className="intel-focus-lead">
+                                    Add your skills to get personalized priority recommendations.
+                                </p>
+                            </div>
+                        ) : userState === 'hasSkills' ? (
+                            <div className="intel-focus-great">
+                                <Target className="intel-focus-check" size={24} />
+                                <p className="intel-focus-lead">
+                                    Select a target role to see your priority skills to develop.
+                                </p>
+                            </div>
+                        ) : topMissing.length > 0 ? (
                             <div className="intel-focus-positive">
                                 <Sparkles className="intel-focus-sparkle" size={22} />
                                 <p className="intel-focus-lead">
@@ -376,17 +462,13 @@ const Dashboard = () => {
                             <ChevronRight size={20} />
                         </Button>
                         <ul className="intel-task-hints">
-                            <li className={hasResume ? 'done' : ''}>
-                                {hasResume ? <CheckCircle2 size={16} /> : <span className="intel-dot" />}
-                                Resume uploaded
+                            <li className={hasSkills ? 'done' : ''}>
+                                {hasSkills ? <CheckCircle size={16} /> : <Circle size={16} />}
+                                Add skills to profile
                             </li>
-                            <li className={hasGap ? 'done' : ''}>
-                                {hasGap ? <CheckCircle2 size={16} /> : <span className="intel-dot" />}
-                                Skills analyzed
-                            </li>
-                            <li className={hasRoadmap ? 'done' : ''}>
-                                {hasRoadmap ? <CheckCircle2 size={16} /> : <span className="intel-dot" />}
-                                Roadmap ready
+                            <li className={hasTargetRole ? 'done' : ''}>
+                                {hasTargetRole ? <CheckCircle size={16} /> : <Circle size={16} />}
+                                Select target role
                             </li>
                         </ul>
                     </Card>

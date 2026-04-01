@@ -1,5 +1,8 @@
 .profile-page {
     animation: fadeIn 0.5s ease-out;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .profile-grid {
@@ -7,6 +10,15 @@
     grid-template-columns: 320px 1fr;
     gap: 2rem;
     margin-top: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .profile-photo-card .card-content {
@@ -216,6 +228,20 @@
     margin-top: 1rem;
 }
 
+.form-actions button {
+    min-width: 140px;
+}
+
+@media (max-width: 480px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}
+
 @media (max-width: 968px) {
     .profile-grid {
         grid-template-columns: 1fr;
@@ -236,4 +262,22 @@
     .form-row {
         grid-template-columns: 1fr;
     }
+}
+
+/* Inline validation error styles */
+.input-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+.input-error:focus {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+.error-text {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: block;
 }

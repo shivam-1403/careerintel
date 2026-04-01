@@ -10,22 +10,27 @@ const CareerRecommendations = () => {
     const navigate = useNavigate();
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
+    const [loadingRole, setLoadingRole] = useState(null);
 
     useEffect(() => {
         const fetchRecommendations = async () => {
             setLoading(true);
             try {
-                const res = await fetch("https://careerintel-w10f.onrender.com/career/recommend", {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`
-                    }
-                });
+                const token = localStorage.getItem("token");
+                const headers = { Authorization: `Bearer ${token}` };
 
-                if (!res.ok) throw new Error("Failed to fetch");
+                const [userRes, recRes] = await Promise.all([
+                    fetch("https://careerintel-w10f.onrender.com/user/profile", { headers }),
+                    fetch("https://careerintel-w10f.onrender.com/career/recommend", { headers })
+                ]);
 
-                const data = await res.json();
+                const userData = userRes.ok ? await userRes.json() : null;
+                const recData = recRes.ok ? await recRes.json() : { recommendations: [] };
+
+                setUser(userData);
                 setRecommendations(
-                    (data.recommendations || []).sort((a, b) => b.score - a.score)
+                    (recData.recommendations || []).sort((a, b) => b.score - a.score)
                 );
             } catch (err) {
                 console.error("Recommendation error:", err);
@@ -43,6 +48,28 @@ const CareerRecommendations = () => {
             return;
         }
         viewCareer(job.role_id, "/learning-path");
+    };
+
+    const handleSetTargetRole = async (career) => {
+        const token = localStorage.getItem("token");
+        setLoadingRole(career.name);
+
+        await fetch("https://careerintel-w10f.onrender.com/user/set-target-role", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                target_role: career.name,
+            }),
+        });
+
+        setUser((prev) => ({
+            ...prev,
+            target_role: career.name,
+        }));
+        setLoadingRole(null);
     };
 
     const viewCareer = (roleId, redirectPage) => {
@@ -160,10 +187,21 @@ const CareerRecommendations = () => {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => viewCareer(job.role_id, "/skill-gap")}
+                                            onClick={() => handleSetTargetRole(job)}
+                                            disabled={loadingRole === job.career || user?.target_role === job.career}
                                         >
-                                            Skill Gap Analysis
+                                            {user?.target_role === job.career ? "Selected ✓" : loadingRole === job.career ? "Setting..." : "Set as Target Role"}
                                         </Button>
+
+                                        {user?.target_role !== job.career && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => viewCareer(job.role_id, "/skill-gap")}
+                                            >
+                                                Skill Gap Analysis
+                                            </Button>
+                                        )}
 
                                         <Button
                                             size="sm"

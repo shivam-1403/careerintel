@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { User, Mail, Tag, Save, Camera } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
 import Loader from '../../components/ui/Loader';
 import './Profile.css';
+
+const BASE_URL = "https://careerintel-w10f.onrender.com";
 
 const Profile = () => {
     const toast = useToast();
@@ -18,6 +20,7 @@ const Profile = () => {
     const [profileImage, setProfileImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
 
     const [formData, setFormData] = useState({
         first_name: "",
@@ -25,69 +28,167 @@ const Profile = () => {
         email: ""
     });
 
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
+
+    // Validate single field
+    const validateField = (name, value) => {
+        if (name === "first_name" && !value?.trim()) {
+            return "First name is required";
+        }
+        if (name === "email") {
+            if (!value?.trim()) return "Email is required";
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) return "Invalid email format";
+        }
+        return "";
+    };
+
+    // Validate all form fields
+    const validate = () => {
+        const errors = {};
+
+        if (!formData.first_name?.trim()) {
+            errors.first_name = "First name is required";
+        }
+
+        if (!formData.email?.trim()) {
+            errors.email = "Email is required";
+        }
+
+        return errors;
+    };
+
     // FETCH USER DATA
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const token = localStorage.getItem("token");
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
 
-                const userRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
+            const userRes = await fetch(
+                "https://careerintel-w10f.onrender.com/user/profile",
+                {
                     headers: { Authorization: `Bearer ${token}` }
-                });
-
-                const userData = await userRes.json();
-
-                setFormData({
-                    first_name: userData.first_name || "",
-                    last_name: userData.last_name || "",
-                    email: userData.email || ""
-                });
-
-                // Set profile image if exists - ensure full URL
-                if (userData.profile_image) {
-                    setProfileImage(userData.profile_image);
-                    localStorage.setItem("profile_image", userData.profile_image);
                 }
+            );
 
-                const skillsRes = await fetch("https://careerintel-w10f.onrender.com/skills", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+            const userData = await userRes.json();
 
-                const skillsData = await skillsRes.json();
-                setSkills(skillsData || []);
-                localStorage.setItem("user_skills", JSON.stringify(skillsData || []));
+            setUser(userData);
 
-            } catch (err) {
-                console.error("Failed to fetch profile data", err);
-            } finally {
-                setLoading(false);
+            setFormData({
+                first_name: userData.first_name || "",
+                last_name: userData.last_name || "",
+                email: userData.email || ""
+            });
+
+            if (userData.profile_image) {
+                const fullUrl = userData.profile_image.startsWith("http")
+                    ? userData.profile_image
+                    : `${BASE_URL}${userData.profile_image}`;
+                setProfileImage(fullUrl);
             }
+
+            const skillsRes = await fetch(
+                "https://careerintel-w10f.onrender.com/skills",
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            const skillsData = await skillsRes.json();
+            setSkills(skillsData || []);
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const handleFocus = () => {
+            fetchData();
         };
 
-        fetchData();
+        window.addEventListener("focus", handleFocus);
+
+        return () => {
+            window.removeEventListener("focus", handleFocus);
+        };
     }, []);
 
 
 
     // HANDLE INPUT CHANGE
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+        // Real-time validation
+        const error = validateField(name, value);
+        setErrors(prev => ({
+            ...prev,
+            [name]: error
+        }));
     };
+
+    // Handle field blur - validate on blur
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+
+        setTouched(prev => ({
+            ...prev,
+            [name]: true
+        }));
+
+        // Validate on blur
+        const error = validateField(name, value);
+        setErrors(prev => ({
+            ...prev,
+            [name]: error
+        }));
+    };
+
+    // Check if form is valid
+    const isFormValid =
+        formData.first_name?.trim() &&
+        formData.email?.trim() &&
+        !errors.first_name &&
+        !errors.email;
 
     // SAVE PROFILE TO DATABASE
     const handleSave = async () => {
+        // Validate form
+        const validationErrors = validate();
+        setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) {
+            return;
+        }
+
         try {
+            const payload = {
+                first_name: formData.first_name.trim(),
+                last_name: formData.last_name?.trim() || "",
+                email: formData.email.trim()
+            };
+
             const res = await fetch("https://careerintel-w10f.onrender.com/user/update", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("token")}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             });
 
             const data = await res.json();
@@ -99,6 +200,12 @@ const Profile = () => {
 
             localStorage.setItem("token", data.access_token);
             toast.success(data.message || "Profile updated successfully");
+
+            // Clear errors on success
+            setErrors({});
+
+            // Refetch user data to ensure consistency
+            await fetchData();
 
         } catch (err) {
             console.error(err);
@@ -229,15 +336,18 @@ const Profile = () => {
             }
 
             // Update UI with new image - ensure full URL
-            const imageUrl = data.image_url || data.profile_image;
-            setProfileImage(imageUrl);
-            localStorage.setItem("profile_image", imageUrl);
+            const imageUrl = (data.image_url || data.profile_image);
+            const fullUrl = imageUrl.startsWith("http")
+                ? imageUrl
+                : `${BASE_URL}${imageUrl}`;
+            setProfileImage(fullUrl);
+            localStorage.setItem("profile_image", fullUrl);
 
             // Also update user in localStorage
             const storedUser = localStorage.getItem("user");
             if (storedUser) {
                 const userData = JSON.parse(storedUser);
-                userData.profile_image = imageUrl;
+                userData.profile_image = fullUrl;
                 localStorage.setItem("user", JSON.stringify(userData));
             }
 
@@ -274,6 +384,19 @@ const Profile = () => {
         const last = formData.last_name?.charAt(0) || "";
         return first + last;
     };
+
+    // Profile status logic
+    const hasSkills = skills.length > 0;
+    const hasTargetRole = !!user?.target_role;
+
+    const getProfileStatus = () => {
+        if (!hasSkills) return "Incomplete";
+        if (hasSkills && !hasTargetRole) return "In Progress";
+        return "Complete";
+    };
+
+    const targetRole = user?.target_role || "Not Set";
+    const profileStatus = getProfileStatus();
 
     return (
         <div className="profile-page">
@@ -343,13 +466,21 @@ const Profile = () => {
                             </div>
 
                             <div className="profile-stat-item">
-                                <span className="ps-label">Courses Done</span>
-                                <span className="ps-value">12</span>
+                                <span className="ps-label">Target Role</span>
+                                <span className="ps-value">{targetRole}</span>
                             </div>
 
+                            {!hasTargetRole && (
+                                <div className="profile-stat-action">
+                                    <Button size="sm" onClick={() => window.location.href = "/career-recommendations"}>
+                                        Set Target Role
+                                    </Button>
+                                </div>
+                            )}
+
                             <div className="profile-stat-item">
-                                <span className="ps-label">Assessments</span>
-                                <span className="ps-value">4</span>
+                                <span className="ps-label">Profile Status</span>
+                                <span className="ps-value">{profileStatus}</span>
                             </div>
 
                         </div>
@@ -360,7 +491,7 @@ const Profile = () => {
                 <div className="profile-right">
                     <Card title="Basic Information">
 
-                        <form className="profile-form" onSubmit={(e)=>e.preventDefault()}>
+                        <form className="profile-form" onSubmit={(e)=>e.preventDefault()} noValidate>
 
                             <div className="form-row">
 
@@ -370,7 +501,10 @@ const Profile = () => {
                                         name="first_name"
                                         value={formData.first_name}
                                         onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        className={errors.first_name && touched.first_name ? "input-error" : ""}
                                     />
+                                    {errors.first_name && touched.first_name && <span className="error-text">{errors.first_name}</span>}
                                 </div>
 
                                 <div className="form-group">
@@ -390,7 +524,10 @@ const Profile = () => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    className={errors.email && touched.email ? "input-error" : ""}
                                 />
+                                {errors.email && touched.email && <span className="error-text">{errors.email}</span>}
                             </div>
 
                             <div className="section-divider"></div>
@@ -453,7 +590,7 @@ const Profile = () => {
                             </div>
 
                             <div className="form-actions">
-                                <Button onClick={handleSave}>
+                                <Button onClick={handleSave} disabled={!isFormValid}>
                                     <Save size={18}/> Save Changes
                                 </Button>
                             </div>

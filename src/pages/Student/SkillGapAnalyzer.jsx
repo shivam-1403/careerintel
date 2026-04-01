@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
-import { Target, CheckCircle, XCircle, ArrowRight, Info } from 'lucide-react';
+import { Target, CheckCircle, XCircle, Info } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Loader from '../../components/ui/Loader';
@@ -162,20 +162,9 @@ const SkillGapAnalyzer = () => {
                             <h3 className="value">{targetCareer || "No target career selected"}</h3>
                         </div>
                     </div>
-                    {roleIdFromURL && !isThisRoleTarget ? (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleSetTargetRole}
-                            disabled={isSettingTarget}
-                        >
-                            {isSettingTarget ? "Setting..." : "Set as Target Role"}
-                        </Button>
-                    ) : (
-                        <Button variant="outline" size="sm" onClick={() => navigate("/career-recommendations")}>
-                            Change Target
-                        </Button>
-                    )}
+                    <Button variant="outline" size="sm" onClick={() => navigate("/career-recommendations")}>
+                        Change Career
+                    </Button>
                 </Card>
 
                 <Card className="match-score-card">
@@ -247,9 +236,6 @@ const SkillGapAnalyzer = () => {
                         ) : (
                             <p>No insights available yet.</p>
                         )}
-                        <Button className="w-full mt-4" onClick={() => navigate("/learning-path")}>
-                            Generate Learning Path <ArrowRight size={18} />
-                        </Button>
                     </Card>
                 </div>
             </div>
