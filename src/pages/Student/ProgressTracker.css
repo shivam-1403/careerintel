@@ -61,77 +61,131 @@
     background-color: var(--border);
 }
 
-.chart-wrapper {
-    margin-top: 1rem;
-}
-
-.progress-bottom-grid {
+/* Insights Dashboard Grid */
+.insights-charts-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
+    margin-top: 1.5rem;
 }
 
-.roadmap-progress-list {
+.chart-container {
+    margin-top: 1rem;
+    min-height: 250px;
+}
+
+.empty-chart {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-}
-
-.rp-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.rp-bar {
-    height: 8px;
-    background-color: var(--input);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.rp-fill {
-    height: 100%;
-    background-color: var(--primary);
-    border-radius: 4px;
-}
-
-.milestone-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-.ms-item {
-    display: flex;
-    gap: 1rem;
     align-items: center;
-}
-
-.ms-marker {
-    color: var(--primary);
-}
-
-.ms-content h4 {
-    font-size: 0.875rem;
-    margin-bottom: 0.125rem;
-}
-
-.ms-content p {
-    font-size: 0.75rem;
+    justify-content: center;
+    min-height: 200px;
     color: var(--muted-foreground);
 }
 
-.ms-item.locked {
-    opacity: 0.5;
+/* Performance Summary */
+.performance-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
-.ms-item.locked .ms-marker {
-    color: var(--muted);
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
 }
 
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-value.best {
+    color: #22c55e;
+}
+
+.stat-value.positive {
+    color: #22c55e;
+}
+
+.stat-value.negative {
+    color: #ef4444;
+}
+
+.additional-stats {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+}
+
+.stat-row span:first-child {
+    color: var(--muted-foreground);
+}
+
+.stat-row span:last-child {
+    font-weight: 600;
+}
+
+/* Missing Skills List */
+.missing-skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.missing-skill-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: #fef3c7;
+    border-radius: 6px;
+    border-left: 3px solid #f59e0b;
+}
+
+.skill-name {
+    font-weight: 500;
+    color: #1e293b;
+    text-transform: capitalize;
+}
+
+.skill-status {
+    font-size: 0.75rem;
+    color: #b45309;
+    background: #fef3c7;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.more-skills {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 8px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .overview-card .card-content {
         flex-direction: column;
@@ -143,7 +197,11 @@
         display: none;
     }
 
-    .progress-bottom-grid {
+    .insights-charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .performance-stats {
         grid-template-columns: 1fr;
     }
 }
