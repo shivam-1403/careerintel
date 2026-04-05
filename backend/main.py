@@ -6,7 +6,6 @@ import shutil
 import pdfplumber
 from groq import Groq
 import os
-from supabase import create_client, Client
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -51,15 +50,6 @@ def get_groq_client():
     if not api_key:
         return None
     return Groq(api_key=api_key)
-
-
-# Initialize Supabase client
-def get_supabase_client() -> Client:
-    supabase_url = os.getenv("SUPABASE_URL")
-    supabase_key = os.getenv("SUPABASE_KEY")
-    if not supabase_url or not supabase_key:
-        raise HTTPException(status_code=500, detail="Supabase configuration missing")
-    return create_client(supabase_url, supabase_key)
 
 
 # AI Insight Generation Function
@@ -212,8 +202,7 @@ def get_profile(
         "last_name": current_user.last_name,
         "email": current_user.email,
         "target_role": role.name if role else None,
-        "target_role_id": current_user.target_role_id,
-        "profile_image": current_user.profile_image or None
+        "target_role_id": current_user.target_role_id
     }
 
 class UpdateProfile(BaseModel):
@@ -249,49 +238,6 @@ def update_profile(
             detail="Email already exists"
         )
 
-@app.post("/user/upload-photo")
-async def upload_profile_photo(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
-):
-    if not file:
-        raise HTTPException(status_code=400, detail="No file provided")
-
-    # Generate filename
-    timestamp = int(time.time())
-    file_extension = file.filename.split(".")[-1] if "." in file.filename else "jpg"
-    filename = f"user_{user.id}_{timestamp}.{file_extension}"
-
-    supabase = get_supabase_client()
-
-    # ✅ READ FILE PROPERLY (IMPORTANT)
-    file_content = await file.read()
-
-    # ✅ UPLOAD
-    supabase.storage.from_("profile-pictures").upload(
-        path=filename,
-        file=file_content,
-        options={"content-type": file.content_type, "upsert": True}
-    )
-
-    # ✅ GET PUBLIC URL (FIXED)
-    public_url = supabase.storage.from_("profile-pictures").get_public_url(filename)
-
-    # ⚠️ FIX: ensure string
-    if isinstance(public_url, dict):
-        public_url = public_url.get("publicUrl")
-
-    # ✅ SAVE TO DB
-    user.profile_image = public_url
-    db.commit()
-    db.refresh(user)   # 🔥 VERY IMPORTANT
-
-    return {
-        "message": "Profile photo uploaded successfully",
-        "profile_image": user.profile_image
-    }
-        
 @app.get("/skills")
 def get_skills(user=Depends(get_current_user), db: Session = Depends(get_db)):
     skills = (

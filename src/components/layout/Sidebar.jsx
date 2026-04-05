@@ -28,7 +28,6 @@ const Sidebar = () => {
     const handleLogout = () => {
         // Clear all user-related localStorage data
         localStorage.removeItem("token");
-        localStorage.removeItem("profile_image");
         localStorage.removeItem("user_skills");
         navigate("/login", { replace: true });
     };

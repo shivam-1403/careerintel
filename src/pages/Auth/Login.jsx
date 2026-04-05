@@ -46,9 +46,6 @@ const Login = () => {
             });
             const userData = await profileRes.json();
             localStorage.setItem("user", JSON.stringify(userData));
-            if (userData.profile_image) {
-                localStorage.setItem("profile_image", userData.profile_image);
-            }
 
             navigate("/dashboard");
 

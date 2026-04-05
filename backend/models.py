@@ -15,7 +15,6 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     target_role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
-    profile_image = Column(String, nullable=True)
     
 
 # =========================

@@ -3,40 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Search, Bell, Menu } from 'lucide-react';
 import './Navbar.css';
 
-const BASE_URL = "https://careerintel-w10f.onrender.com";
-
 const Navbar = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
-    const [profileImage, setProfileImage] = useState(null);
     const [loading, setLoading] = useState(true);
-
-    // Listen for localStorage changes (e.g., after profile upload)
-    useEffect(() => {
-        const updateProfileImage = () => {
-            const storedImage = localStorage.getItem("profile_image");
-            if (storedImage) {
-                const fullUrl = storedImage.startsWith("http")
-                    ? storedImage
-                    : `${BASE_URL}${storedImage}`;
-                setProfileImage(fullUrl);
-            }
-        };
-
-        // Listen for storage events from other tabs
-        window.addEventListener('storage', updateProfileImage);
-
-        // Listen for custom event from same tab
-        window.addEventListener('profile-image-updated', updateProfileImage);
-
-        // Check initial value
-        updateProfileImage();
-
-        return () => {
-            window.removeEventListener('storage', updateProfileImage);
-            window.removeEventListener('profile-image-updated', updateProfileImage);
-        };
-    }, []);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -57,15 +27,7 @@ const Navbar = ({ toggleSidebar }) => {
                 );
 
                 const data = await res.json();
-
                 setUser(data);
-
-                if (data.profile_image) {
-                    const fullUrl = data.profile_image.startsWith("http")
-                        ? data.profile_image
-                        : `${BASE_URL}${data.profile_image}`;
-                    setProfileImage(fullUrl);
-                }
             } catch (err) {
                 console.error("Error fetching user:", err);
             } finally {
@@ -76,7 +38,7 @@ const Navbar = ({ toggleSidebar }) => {
         fetchUser();
     }, []);
 
-    // Get initials for fallback avatar
+    // Get initials for avatar
     const getInitials = () => {
         if (!user) return "";
         const first = user.first_name?.charAt(0) || "";
@@ -106,25 +68,22 @@ const Navbar = ({ toggleSidebar }) => {
                   onClick={() => navigate("/profile")}
                   style={{ cursor: "pointer" }}
                 >
-                  <div className="user-avatar">
+                  <div className="user-avatar" style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      background: '#4F46E5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#fff'
+                  }}>
                     {loading ? (
                         <div className="avatar-loader"></div>
-                    ) : profileImage ? (
-                        <img
-                            src={profileImage}
-                            alt="Profile"
-                            className="nav-profile-img"
-                            onError={(e) => {
-                                // Fallback if image fails to load
-                                e.target.style.display = 'none';
-                                const initials = getInitials();
-                                if (initials) {
-                                    e.target.parentElement.innerHTML = `<span class="avatar-initials">${initials}</span>`;
-                                }
-                            }}
-                        />
                     ) : (
-                        <span className="avatar-initials">{getInitials()}</span>
+                        <span>{getInitials()}</span>
                     )}
                   </div>
                   <div className="user-info">

@@ -1,24 +1,23 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
-import { User, Mail, Tag, Save, Camera } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { User, Mail, Tag, Save } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
 import Loader from '../../components/ui/Loader';
 import './Profile.css';
 
-const BASE_URL = "https://careerintel-w10f.onrender.com";
+const getInitials = (first, last) => {
+    return (first?.charAt(0) || "") + (last?.charAt(0) || "");
+};
 
 const Profile = () => {
     const toast = useToast();
-    const fileInputRef = useRef(null);
 
     // Initialize with empty array to avoid flashing
     const [skills, setSkills] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [selectedSkill, setSelectedSkill] = useState(null);
-    const [profileImage, setProfileImage] = useState(null);
-    const [isUploading, setIsUploading] = useState(false);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
 
@@ -82,13 +81,6 @@ const Profile = () => {
                 last_name: userData.last_name || "",
                 email: userData.email || ""
             });
-
-            if (userData.profile_image) {
-                const fullUrl = userData.profile_image.startsWith("http")
-                    ? userData.profile_image
-                    : `${BASE_URL}${userData.profile_image}`;
-                setProfileImage(fullUrl);
-            }
 
             const skillsRes = await fetch(
                 "https://careerintel-w10f.onrender.com/skills",
@@ -292,97 +284,6 @@ const Profile = () => {
         localStorage.setItem("user_skills", JSON.stringify(newSkills));
     };
 
-    // PHOTO UPLOAD HANDLERS
-    const handlePhotoClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handlePhotoChange = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (!allowedTypes.includes(file.type)) {
-            toast.error("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed");
-            return;
-        }
-
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error("File too large. Maximum size is 5MB");
-            return;
-        }
-
-        const token = localStorage.getItem("token");
-        if (!token) {
-            toast.error("Authentication required. Please login again.");
-            return;
-        }
-
-        setIsUploading(true);
-        try {
-            const formData = new FormData();
-            formData.append("file", file);
-
-            const res = await fetch("https://careerintel-w10f.onrender.com/user/upload-photo", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                toast.error(errorData.detail || "Failed to upload photo");
-                return;
-            }
-
-            const data = await res.json();
-
-            // Update UI with new image - ensure full URL
-            const imageUrl = (data.image_url || data.profile_image);
-            const fullUrl = imageUrl?.startsWith("http")
-                ? imageUrl
-                : `${BASE_URL}${imageUrl}`;
-
-            setProfileImage(fullUrl);
-            localStorage.setItem("profile_image", fullUrl);
-
-            // Dispatch event to update Navbar immediately (same tab)
-            window.dispatchEvent(new Event('profile-image-updated'));
-
-            // Update user state for instant UI update
-            if (user) {
-                setUser({
-                    ...user,
-                    profile_image: fullUrl
-                });
-            }
-
-            // Also update user in localStorage
-            const storedUser = localStorage.getItem("user");
-            if (storedUser) {
-                const userData = JSON.parse(storedUser);
-                userData.profile_image = fullUrl;
-                localStorage.setItem("user", JSON.stringify(userData));
-            }
-
-            toast.success("Profile photo updated successfully");
-
-        } catch (err) {
-            console.error("Upload error:", err);
-            toast.error("Failed to upload photo. Please try again.");
-        } finally {
-            setIsUploading(false);
-            // Reset input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
-        }
-    };
-
     // Show loader while fetching initial data
     if (loading) {
         return (
@@ -395,13 +296,6 @@ const Profile = () => {
             </div>
         );
     }
-
-    // Get initials for fallback avatar
-    const getInitials = () => {
-        const first = formData.first_name?.charAt(0) || "";
-        const last = formData.last_name?.charAt(0) || "";
-        return first + last;
-    };
 
     // Profile status logic
     const hasSkills = skills.length > 0;
@@ -430,41 +324,21 @@ const Profile = () => {
                 <div className="profile-left">
                     <Card className="profile-photo-card">
 
-                        <div className="profile-photo-wrapper">
-                            <div className="profile-photo" onClick={handlePhotoClick} style={{ cursor: 'pointer' }}>
-                                {profileImage ? (
-                                    <img
-                                        src={profileImage}
-                                        alt="Profile"
-                                        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-                                        onError={(e) => {
-                                            // Fallback to initials if image fails
-                                            e.target.style.display = 'none';
-                                            e.target.nextSibling?.classList.remove('hidden');
-                                        }}
-                                    />
-                                ) : (
-                                    <span className="avatar-initials">{getInitials()}</span>
-                                )}
-                                <div className="photo-overlay">
-                                    <Camera size={20} />
-                                </div>
+                        <div className="profile-photo-wrapper" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <div style={{
+                                width: '120px',
+                                height: '120px',
+                                borderRadius: '50%',
+                                background: '#4F46E5',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '42px',
+                                fontWeight: '600',
+                                color: '#fff'
+                            }}>
+                                {getInitials(formData.first_name, formData.last_name)}
                             </div>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handlePhotoChange}
-                                accept="image/jpeg,image/png,image/gif,image/webp"
-                                style={{ display: 'none' }}
-                            />
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handlePhotoClick}
-                                disabled={isUploading}
-                            >
-                                {isUploading ? "Uploading..." : "Change Photo"}
-                            </Button>
                         </div>
 
                         <div className="profile-status">
