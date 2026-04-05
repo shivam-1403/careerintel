@@ -56,37 +56,6 @@ def extract_keywords(text):
     return list(set(keywords + phrases))
 
 
-# -------------------- KEYWORD MATCHING --------------------
-def keyword_match_score(resume_text, jd_text):
-    jd_keywords = extract_keywords(jd_text)
-    resume_text = resume_text.lower()
-
-    matched = []
-    missing = []
-
-    for kw in jd_keywords:
-        pattern = r'\b' + re.escape(kw) + r'\b'
-        if re.search(pattern, resume_text):
-            matched.append(kw)
-        else:
-            missing.append(kw)
-
-    if not jd_keywords:
-        return 0, [], []
-
-    score = (len(matched) / len(jd_keywords)) * 100
-
-    return round(score, 2), matched[:20], missing[:20]
-
-
-# -------------------- SEMANTIC SIMILARITY --------------------
-def semantic_similarity_score(resume_text, jd_text):
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
-    vectors = vectorizer.fit_transform([resume_text, jd_text])
-    similarity = cosine_similarity(vectors[0:1], vectors[1:2])[0][0]
-    return round(similarity * 100, 2)
-
-
 # -------------------- QUANTIFIED SCORE --------------------
 def quantified_score(resume_text):
     count = len(re.findall(r'\d+%|\$\d+|\d+\+|\d+ years', resume_text.lower()))

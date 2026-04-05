@@ -11,7 +11,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=True)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     target_role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)

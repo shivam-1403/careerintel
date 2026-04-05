@@ -74,8 +74,6 @@ def compare_skills_with_roles(user_skills, db):
 # RECOMMEND ROLES FOR REAL USER
 # ===============================
 def recommend_roles_for_user(user_id, db):
-    from models import UserSkill
-
     user_skill_mappings = db.query(UserSkill).filter(
         UserSkill.user_id == user_id
     ).all()

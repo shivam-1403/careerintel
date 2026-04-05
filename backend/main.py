@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db, Base, engine
-from models import User, Skill, UserSkill, Role, RoleSkill, ResumeScan, UserRoadmap
+from models import User, Skill, UserSkill, Role, RoleSkill, ResumeScan, UserRoadmap, Base
 from auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 from jose import JWTError, jwt
 from services.career_engine import extract_skills_from_text, compare_skills_with_roles, recommend_roles_for_user, get_skill_gap_for_role
@@ -37,17 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from database import engine
-from models import Base
-
 Base.metadata.create_all(bind=engine)
-
-# Create uploads directory if it doesn't exist
-os.makedirs("uploads", exist_ok=True)
-
-# Mount static files for uploads
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
 
 # Initialize Groq client
 def get_groq_client():

@@ -5,7 +5,7 @@ import hashlib
 
 SECRET_KEY = "supersecretkey123"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 180
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
