@@ -6,6 +6,7 @@ import shutil
 import pdfplumber
 from groq import Groq
 import os
+from supabase import create_client, Client
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -50,6 +51,15 @@ def get_groq_client():
     if not api_key:
         return None
     return Groq(api_key=api_key)
+
+
+# Initialize Supabase client
+def get_supabase_client() -> Client:
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_KEY")
+    if not supabase_url or not supabase_key:
+        raise HTTPException(status_code=500, detail="Supabase configuration missing")
+    return create_client(supabase_url, supabase_key)
 
 
 # AI Insight Generation Function
@@ -245,7 +255,7 @@ def upload_profile_photo(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    """Upload and save user's profile photo"""
+    """Upload and save user's profile photo to Supabase Storage"""
     if not file:
         raise HTTPException(status_code=400, detail="No file provided")
 
@@ -258,30 +268,41 @@ def upload_profile_photo(
     timestamp = int(time.time())
     file_extension = file.filename.split(".")[-1] if "." in file.filename else "jpg"
     filename = f"user_{user.id}_{timestamp}.{file_extension}"
-    file_path = os.path.join("uploads", filename)
+
+    # Get Supabase client
+    supabase = get_supabase_client()
 
     # Delete old profile image if exists
     if user.profile_image:
-        old_filename = user.profile_image.split("/")[-1].split("?")[0]  # Handle timestamp in filename
-        old_path = os.path.join("uploads", old_filename)
-        if os.path.exists(old_path):
-            os.remove(old_path)
+        try:
+            # Extract the file path from the URL (everything after /storage/v1/object/)
+            old_path = user.profile_image.split("/storage/v1/object/")[-1] if "/storage/v1/object/" in user.profile_image else None
+            if old_path:
+                supabase.storage.from_("profile-pictures").remove([old_path])
+        except Exception as e:
+            print(f"Error deleting old image: {e}")
 
-    # Save the file
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    # Read file content
+    file_content = file.file.read()
 
-    # Return FULL public URL for frontend to display
-    # Use production URL - change this if deploying to a different domain
-    BASE_URL = "https://careerintel-w10f.onrender.com"
-    full_url = f"{BASE_URL}/uploads/{filename}"
-    user.profile_image = full_url
+    # Upload to Supabase Storage
+    response = supabase.storage.from_("profile-pictures").upload(
+        path=filename,
+        file=file_content,
+        options={"content_type": file.content_type, "upsert": True}
+    )
+
+    # Get public URL
+    public_url = supabase.storage.from_("profile-pictures").get_public_url(filename)
+
+    # Save to database
+    user.profile_image = public_url
     db.commit()
 
     return {
         "message": "Profile photo uploaded successfully",
-        "profile_image": full_url,
-        "image_url": full_url
+        "profile_image": public_url,
+        "image_url": public_url
     }
         
 @app.get("/skills")
