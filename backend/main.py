@@ -250,59 +250,46 @@ def update_profile(
         )
 
 @app.post("/user/upload-photo")
-def upload_profile_photo(
+async def upload_profile_photo(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    """Upload and save user's profile photo to Supabase Storage"""
     if not file:
         raise HTTPException(status_code=400, detail="No file provided")
 
-    # Validate file type
-    allowed_types = {"image/jpeg", "image/png", "image/gif", "image/webp"}
-    if file.content_type not in allowed_types:
-        raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed")
-
-    # Generate unique filename using user_id and timestamp
+    # Generate filename
     timestamp = int(time.time())
     file_extension = file.filename.split(".")[-1] if "." in file.filename else "jpg"
     filename = f"user_{user.id}_{timestamp}.{file_extension}"
 
-    # Get Supabase client
     supabase = get_supabase_client()
 
-    # Delete old profile image if exists
-    if user.profile_image:
-        try:
-            # Extract the file path from the URL (everything after /storage/v1/object/)
-            old_path = user.profile_image.split("/storage/v1/object/")[-1] if "/storage/v1/object/" in user.profile_image else None
-            if old_path:
-                supabase.storage.from_("profile-pictures").remove([old_path])
-        except Exception as e:
-            print(f"Error deleting old image: {e}")
+    # ✅ READ FILE PROPERLY (IMPORTANT)
+    file_content = await file.read()
 
-    # Read file content
-    file_content = file.file.read()
-
-    # Upload to Supabase Storage
-    response = supabase.storage.from_("profile-pictures").upload(
+    # ✅ UPLOAD
+    supabase.storage.from_("profile-pictures").upload(
         path=filename,
         file=file_content,
-        options={"content_type": file.content_type, "upsert": True}
+        options={"content-type": file.content_type, "upsert": True}
     )
 
-    # Get public URL
+    # ✅ GET PUBLIC URL (FIXED)
     public_url = supabase.storage.from_("profile-pictures").get_public_url(filename)
 
-    # Save to database
+    # ⚠️ FIX: ensure string
+    if isinstance(public_url, dict):
+        public_url = public_url.get("publicUrl")
+
+    # ✅ SAVE TO DB
     user.profile_image = public_url
     db.commit()
+    db.refresh(user)   # 🔥 VERY IMPORTANT
 
     return {
         "message": "Profile photo uploaded successfully",
-        "profile_image": public_url,
-        "image_url": public_url
+        "profile_image": user.profile_image
     }
         
 @app.get("/skills")
