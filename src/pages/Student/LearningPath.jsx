@@ -210,15 +210,15 @@ const LearningPath = () => {
                 </div>
             )}
 
-            {roleIdFromURL && !isThisRoleTarget && (
+            {roleIdFromURL && (
                 <div style={{ marginBottom: '1rem' }}>
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={handleSetTargetRole}
-                        disabled={isSettingTarget}
+                        disabled={isSettingTarget || isThisRoleTarget}
                     >
-                        {isSettingTarget ? "Setting..." : "Set as Target Role"}
+                        {isThisRoleTarget ? "Selected" : isSettingTarget ? "Setting..." : "Set as Target"}
                     </Button>
                 </div>
             )}

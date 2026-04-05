@@ -52,24 +52,35 @@ const CareerRecommendations = () => {
 
     const handleSetTargetRole = async (career) => {
         const token = localStorage.getItem("token");
-        setLoadingRole(career.name);
+        setLoadingRole(career.role_id);
 
-        await fetch("https://careerintel-w10f.onrender.com/user/set-target-role", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                target_role: career.name,
-            }),
-        });
+        try {
+            const response = await fetch(`https://careerintel-w10f.onrender.com/user/target-role/${career.role_id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-        setUser((prev) => ({
-            ...prev,
-            target_role: career.name,
-        }));
-        setLoadingRole(null);
+            if (response.ok) {
+                // Refetch user data and recommendations
+                const [userRes, recRes] = await Promise.all([
+                    fetch("https://careerintel-w10f.onrender.com/user/profile", { headers: { Authorization: `Bearer ${token}` } }),
+                    fetch("https://careerintel-w10f.onrender.com/career/recommend", { headers: { Authorization: `Bearer ${token}` } })
+                ]);
+
+                const userData = userRes.ok ? await userRes.json() : null;
+                const recData = recRes.ok ? await recRes.json() : { recommendations: [] };
+
+                setUser(userData);
+                setRecommendations((recData.recommendations || []).sort((a, b) => b.score - a.score));
+            }
+        } catch (err) {
+            console.error("Error setting target role:", err);
+        } finally {
+            setLoadingRole(null);
+        }
     };
 
     const viewCareer = (roleId, redirectPage) => {
@@ -188,20 +199,18 @@ const CareerRecommendations = () => {
                                             variant="outline"
                                             size="sm"
                                             onClick={() => handleSetTargetRole(job)}
-                                            disabled={loadingRole === job.career || user?.target_role === job.career}
+                                            disabled={loadingRole === job.role_id}
                                         >
-                                            {user?.target_role === job.career ? "Selected ✓" : loadingRole === job.career ? "Setting..." : "Set as Target Role"}
+                                            {user?.target_role_id === job.role_id ? "Selected" : loadingRole === job.role_id ? "Setting..." : "Set as Target"}
                                         </Button>
 
-                                        {user?.target_role !== job.career && (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => viewCareer(job.role_id, "/skill-gap")}
-                                            >
-                                                Skill Gap Analysis
-                                            </Button>
-                                        )}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => viewCareer(job.role_id, "/skill-gap")}
+                                        >
+                                            Skill Gap
+                                        </Button>
 
                                         <Button
                                             size="sm"
