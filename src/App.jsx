@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ScrollToTop from "./components/utils/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -25,6 +25,7 @@ import CareerRecommendations from './pages/Student/CareerRecommendations';
 import SkillGapAnalyzer from './pages/Student/SkillGapAnalyzer';
 import LearningPath from './pages/Student/LearningPath';
 import ProgressTracker from './pages/Student/ProgressTracker';
+import CareerDetails from './pages/Student/CareerDetails';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 
 function App() {
@@ -100,6 +101,14 @@ function App() {
               <MainLayout><ProgressTracker /></MainLayout>
             </ProtectedRoute>
           } 
+        />
+        <Route
+          path="/career/:id"
+          element={
+            <ProtectedRoute>
+              <MainLayout><CareerDetails /></MainLayout>
+            </ProtectedRoute>
+          }
         />
 
         {/* Admin Routes */}

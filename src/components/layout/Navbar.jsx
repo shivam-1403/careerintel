@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Bell, Menu, X, TrendingUp, Target, Lightbulb, Zap, Briefcase, Code, Loader2 } from 'lucide-react';
+import { Search, Bell, Menu, TrendingUp, Target, Lightbulb, Zap, Briefcase, Code, Loader2 } from 'lucide-react';
 import './Navbar.css';
 
 const BASE_URL = "https://careerintel-w10f.onrender.com";
@@ -68,6 +68,9 @@ const Navbar = ({ toggleSidebar }) => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
 
+    /** Shown when a skill result is chosen (no navigation; dropdown stays open) */
+    const [searchNotice, setSearchNotice] = useState('');
+
     // Fetch user data on mount
     useEffect(() => {
         const fetchUser = async () => {
@@ -122,6 +125,7 @@ const Navbar = ({ toggleSidebar }) => {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
                 setShowDropdown(false);
                 setSelectedIndex(-1);
+                setSearchNotice('');
             }
         };
 
@@ -138,6 +142,7 @@ const Navbar = ({ toggleSidebar }) => {
         }
 
         setIsSearching(true);
+        setSearchNotice('');
 
         try {
             const res = await fetch(`${BASE_URL}/search?q=${encodeURIComponent(query.trim())}`);
@@ -178,6 +183,7 @@ const Navbar = ({ toggleSidebar }) => {
             setSearchResults({ roles: [], skills: [] });
             setShowDropdown(false);
             setIsSearching(false);
+            setSearchNotice('');
             return;
         }
 
@@ -198,10 +204,8 @@ const Navbar = ({ toggleSidebar }) => {
         const allResults = getAllResults();
 
         if (!showDropdown || allResults.length === 0) {
-            if (e.key === 'Enter' && searchQuery.trim()) {
-                navigate(`/career-recommendations?search=${encodeURIComponent(searchQuery.trim())}`);
-                setSearchQuery('');
-                setShowDropdown(false);
+            if (e.key === 'Enter' && allResults.length > 0) {
+                handleResultClick(allResults[0]);
             }
             return;
         }
@@ -219,15 +223,14 @@ const Navbar = ({ toggleSidebar }) => {
                 e.preventDefault();
                 if (selectedIndex >= 0 && allResults[selectedIndex]) {
                     handleResultClick(allResults[selectedIndex]);
-                } else if (searchQuery.trim()) {
-                    navigate(`/career-recommendations?search=${encodeURIComponent(searchQuery.trim())}`);
-                    setSearchQuery('');
+                } else if (allResults.length > 0) {
+                    handleResultClick(allResults[0]);
                 }
-                setShowDropdown(false);
                 break;
             case 'Escape':
                 setShowDropdown(false);
                 setSelectedIndex(-1);
+                setSearchNotice('');
                 break;
             default:
                 break;
@@ -237,23 +240,16 @@ const Navbar = ({ toggleSidebar }) => {
     // Handle result click
     const handleResultClick = (result) => {
         if (result.type === 'role') {
-            navigate(`/career-recommendations?role=${result.id}`);
-        } else {
-            // For skills, search in career recommendations to show roles requiring that skill
-            navigate(`/career-recommendations?search=${encodeURIComponent(result.name)}`);
-        }
-        setSearchQuery('');
-        setShowDropdown(false);
-        setSelectedIndex(-1);
-    };
-
-    // Handle search input enter key (for direct search)
-    const handleSearchKeyDown = (e) => {
-        if (e.key === 'Enter' && searchQuery.trim() && !showDropdown) {
-            navigate(`/career-recommendations?search=${encodeURIComponent(searchQuery.trim())}`);
+            setSearchNotice('');
+            navigate(`/career/${result.id}`);
             setSearchQuery('');
             setShowDropdown(false);
+            setSelectedIndex(-1);
+            return;
         }
+
+        // Skills: no navigation; show notice and keep dropdown + results visible
+        setSearchNotice('Skill exploration coming soon');
     };
 
     // Toggle notifications
@@ -297,6 +293,11 @@ const Navbar = ({ toggleSidebar }) => {
                     {/* Search Dropdown */}
                     {showDropdown && (
                         <div className="search-dropdown" ref={dropdownRef}>
+                            {searchNotice ? (
+                                <div className="search-notice" role="status" aria-live="polite">
+                                    {searchNotice}
+                                </div>
+                            ) : null}
                             {searchQuery.trim() && !isSearching && !hasResults ? (
                                 <div className="search-empty">
                                     <p>No results found</p>
@@ -343,14 +344,19 @@ const Navbar = ({ toggleSidebar }) => {
                                                     return (
                                                         <div
                                                             key={`skill-${skill.id}`}
-                                                            className={`search-result-item ${selectedIndex === globalIdx ? 'selected' : ''}`}
+                                                            className={`search-result-item search-result-item--skill ${selectedIndex === globalIdx ? 'selected' : ''}`}
                                                             onClick={() => handleResultClick({ ...skill, type: 'skill' })}
                                                             onMouseEnter={() => setSelectedIndex(globalIdx)}
                                                         >
                                                             <Code size={16} className="result-icon skill-icon" />
-                                                            <div className="result-content">
-                                                                <span className="result-name">{skill.name}</span>
-                                                                <span className="result-category">{skill.category}</span>
+                                                            <div className="result-content result-content--skill">
+                                                                <div className="result-text-stack">
+                                                                    <span className="result-name">{skill.name}</span>
+                                                                    <span className="result-category">{skill.category}</span>
+                                                                </div>
+                                                                <span className="search-skill-soon-badge" title="Skill pages are not available yet">
+                                                                    Coming soon
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     );

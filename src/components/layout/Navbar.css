@@ -381,6 +381,56 @@
     font-size: 0.875rem;
 }
 
+.search-notice {
+    padding: 8px 14px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    background: var(--muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.search-result-item .result-content--skill {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-item .result-text-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.search-result-item .result-text-stack .result-name {
+    min-width: 0;
+}
+
+.search-skill-soon-badge {
+    flex-shrink: 0;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted-foreground);
+    opacity: 0.72;
+    padding: 3px 7px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--input);
+}
+
+.search-result-item:hover .search-skill-soon-badge,
+.search-result-item.selected .search-skill-soon-badge {
+    opacity: 0.88;
+}
+
 .search-section {
     padding: 8px 0;
 }
