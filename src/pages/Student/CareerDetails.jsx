@@ -6,6 +6,9 @@ import Button from '../../components/ui/Button';
 import './Dashboard.css';
 import './CareerDetails.css';
 
+// Fallback message for unavailable AI insights
+export const PROFESSIONAL_FALLBACK_MESSAGE = 'Career guidance based on your current skills and readiness analysis.';
+
 const API_BASE = 'https://careerintel-w10f.onrender.com';
 
 const authHeaders = () => ({
