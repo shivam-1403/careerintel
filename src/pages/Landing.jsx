@@ -1,11 +1,31 @@
 ﻿import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Rocket, Target, Shield, Zap, CheckCircle, ArrowRight } from 'lucide-react';
 import Button from '../components/ui/Button';
 import './Landing.css';
 
 const Landing = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const scrollToSection = (sectionId) => {
+        if (location.pathname === '/') {
+            // Already on homepage, just scroll
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        } else {
+            // Navigate to home first, then scroll after a short delay
+            navigate('/');
+            setTimeout(() => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 100);
+        }
+    };
 
     const features = [
         {
@@ -64,16 +84,16 @@ const Landing = () => {
                     </div>
                     <div className="hero-stats">
                         <div className="stat-card">
-                            <span className="stat-value">95%</span>
-                            <span className="stat-label">Match Accuracy</span>
+                            <span className="stat-value"><Zap className="stat-icon" /></span>
+                            <span className="stat-label">AI-Powered Matching</span>
                         </div>
                         <div className="stat-card">
-                            <span className="stat-value">50k+</span>
-                            <span className="stat-label">Learning Resources</span>
+                            <span className="stat-value"><Target className="stat-icon" /></span>
+                            <span className="stat-label">Personalized Learning Paths</span>
                         </div>
                         <div className="stat-card">
-                            <span className="stat-value">10k+</span>
-                            <span className="stat-label">Student Successes</span>
+                            <span className="stat-value"><Shield className="stat-icon" /></span>
+                            <span className="stat-label">Career-Focused Insights</span>
                         </div>
                     </div>
                 </div>
@@ -125,20 +145,20 @@ const Landing = () => {
                     <div className="footer-links">
                         <div className="link-group">
                             <h4>Product</h4>
-                            <Link to="/login">Features</Link>
-                            <Link to="/signup">Pricing</Link>
+                            <a href="#" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Features</a>
+                            <Link to="/pricing">Pricing</Link>
                         </div>
 
                         <div className="link-group">
                             <h4>Company</h4>
-                            <Link to="/">About Us</Link>
-                            <Link to="/">Contact</Link>
+                            <Link to="/about">About Us</Link>
+                            <Link to="/contact">Contact</Link>
                         </div>
 
                         <div className="link-group">
                             <h4>Legal</h4>
-                            <Link to="/">Privacy Policy</Link>
-                            <Link to="/">Terms of Service</Link>
+                            <Link to="/privacy">Privacy Policy</Link>
+                            <Link to="/terms">Terms of Service</Link>
                         </div>
                     </div>
                 </div>

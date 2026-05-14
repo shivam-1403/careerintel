@@ -37,6 +37,17 @@
     border-color: var(--primary);
 }
 
+.recommendation-card.highlighted {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary), 0 10px 40px rgba(79, 70, 229, 0.15);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 2px var(--primary), 0 10px 40px rgba(79, 70, 229, 0.15); }
+    50% { box-shadow: 0 0 0 4px var(--primary), 0 10px 40px rgba(79, 70, 229, 0.25); }
+}
+
 .job-header {
     display: flex;
     justify-content: space-between;

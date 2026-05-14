@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Sparkles, Briefcase, MapPin, DollarSign, ArrowRight, Star, Info } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -8,10 +8,16 @@ import './CareerRecommendations.css';
 
 const CareerRecommendations = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
     const [loadingRole, setLoadingRole] = useState(null);
+    const highlightedRoleRef = useRef(null);
+
+    // Get search params from navbar search
+    const searchQuery = searchParams.get('search');
+    const roleIdParam = searchParams.get('role');
 
     useEffect(() => {
         const fetchRecommendations = async () => {
@@ -41,6 +47,26 @@ const CareerRecommendations = () => {
 
         fetchRecommendations();
     }, []);
+
+    // Auto-scroll/highlight when role param is passed from search
+    useEffect(() => {
+        if (!loading && recommendations.length > 0) {
+            if (roleIdParam) {
+                const targetIndex = recommendations.findIndex(r => r.role_id === parseInt(roleIdParam));
+                if (targetIndex !== -1 && highlightedRoleRef.current) {
+                    highlightedRoleRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+    }, [loading, recommendations, roleIdParam]);
+
+    // Filter recommendations based on search query
+    const filteredRecommendations = searchQuery
+        ? recommendations.filter(r =>
+            r.career?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.matched_skills?.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+        )
+        : recommendations;
 
     const handleExplore = (job) => {
         if (!job.role_id) {
@@ -126,8 +152,14 @@ const CareerRecommendations = () => {
             ) : (
                 <>
                     <div className="recommendations-container">
-                        {recommendations.map((job, index) => (
-                            <Card key={index} className="recommendation-card">
+                        {filteredRecommendations.map((job, index) => {
+                            const isHighlighted = roleIdParam && job.role_id === parseInt(roleIdParam);
+                            return (
+                            <Card
+                                key={index}
+                                className={`recommendation-card ${isHighlighted ? 'highlighted' : ''}`}
+                                ref={isHighlighted ? highlightedRoleRef : null}
+                            >
                                 <div className="job-header">
                                     <div className="job-title-area">
                                         <div className="job-icon">
@@ -223,7 +255,8 @@ const CareerRecommendations = () => {
 
                                 </div>
                             </Card>
-                        ))}
+                        );
+                        })}
                     </div>
 
                     <div className="discovery-cta mt-8">

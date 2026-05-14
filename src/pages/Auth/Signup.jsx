@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
+import PasswordInput from '../../components/ui/PasswordInput';
 import './Auth.css';
 
 const Signup = () => {
@@ -96,12 +97,10 @@ const Signup = () => {
                     </div>
                     <div className="form-group">
                         <label>Password</label>
-                        <input
-                            type="password"
-                            placeholder="••••••••"
+                        <PasswordInput
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            required
+                            autoComplete="new-password"
                         />
                     </div>
                     <div className="form-group checkbox-group">

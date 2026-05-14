@@ -6,6 +6,34 @@
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
     gap: 0.5rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    transition: background var(--transition-fast);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-primary {
@@ -15,8 +43,13 @@
 
 .btn-primary:hover {
     background-color: var(--primary-hover);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
 }
 
 .btn-secondary {
@@ -28,6 +61,11 @@
 .btn-secondary:hover {
     background-color: var(--input);
     border-color: var(--muted-foreground);
+    transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+    transform: translateY(0);
 }
 
 .btn-outline {
@@ -38,6 +76,11 @@
 
 .btn-outline:hover {
     background-color: var(--ring);
+    transform: translateY(-2px);
+}
+
+.btn-outline:active {
+    transform: translateY(0);
 }
 
 .btn-ghost {
@@ -48,6 +91,11 @@
 .btn-ghost:hover {
     background-color: var(--input);
     color: var(--foreground);
+    transform: translateY(-2px);
+}
+
+.btn-ghost:active {
+    transform: translateY(0);
 }
 
 .btn-md {

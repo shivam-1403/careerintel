@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
+import PasswordInput from '../../components/ui/PasswordInput';
 import './Auth.css';
 
 const Login = () => {
@@ -87,14 +88,13 @@ const Login = () => {
                             <label>Password</label>
                             <span className="auth-link small" onClick={() => navigate('/forgot-password')}>Forgot password?</span>
                         </div>
-                        <input
-                            type="password"
+                        <PasswordInput
                             value={password}
                             onChange={(e) => {
                                 setPassword(e.target.value);
                                 setError("");
                             }}
-                            required
+                            autoComplete="current-password"
                         />
                     </div>
                     {error && <p className="auth-error">{error}</p>}

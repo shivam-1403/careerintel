@@ -80,12 +80,68 @@ input, textarea, select {
   padding: 0.625rem 0.875rem;
   width: 100%;
   transition: var(--transition-fast);
+  cursor: text;
 }
 
-input:focus {
+input:hover, textarea:hover, select:hover {
+  border-color: var(--muted);
+}
+
+input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--ring);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* Password Input Styles */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 2.75rem;
+  width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.password-toggle:hover {
+  color: var(--card-foreground);
+  background-color: var(--input);
+}
+
+.password-toggle:focus {
+  outline: none;
+}
+
+.password-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.password-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
 }
 
 /* Scrollbar Styling */

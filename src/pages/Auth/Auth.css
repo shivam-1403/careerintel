@@ -114,10 +114,13 @@
     color: var(--primary);
     font-weight: 600;
     cursor: pointer;
+    transition: var(--transition-fast);
+    display: inline-block;
 }
 
 .auth-link:hover {
-    text-decoration: underline;
+    color: var(--primary-hover);
+    opacity: 0.8;
 }
 
 .auth-link.small {
@@ -145,4 +148,16 @@
     .form-row {
         grid-template-columns: 1fr;
     }
+}
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-password-toggle-button {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
 }

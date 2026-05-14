@@ -30,7 +30,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://careerintel-beta.vercel.app"
+        "https://careerintel-beta.vercel.app",
+        "https://careerintel-w10f.onrender.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -907,4 +908,31 @@ def debug_files():
     return {
         "cwd": os.getcwd(),
         "files": os.listdir("uploads") if os.path.exists("uploads") else "uploads folder missing"
+    }
+
+@app.get("/search")
+def search(q: str, db: Session = Depends(get_db)):
+
+    if not q or len(q.strip()) < 1:
+        return {"roles": [], "skills": []}
+
+    query_lower = q.strip().lower()
+
+    roles = db.query(Role).filter(
+        Role.name.ilike(f"%{query_lower}%")
+    ).limit(8).all()
+
+    skills = db.query(Skill).filter(
+        Skill.name.ilike(f"%{query_lower}%")
+    ).limit(8).all()
+
+    return {
+        "roles": [
+            {"id": r.id, "name": r.name, "category": r.category}
+            for r in roles
+        ],
+        "skills": [
+            {"id": s.id, "name": s.name, "category": s.category}
+            for s in skills
+        ]
     }

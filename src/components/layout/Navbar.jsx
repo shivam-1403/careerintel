@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Bell, Menu, X, TrendingUp, Target, Lightbulb, Zap } from 'lucide-react';
+import { Search, Bell, Menu, X, TrendingUp, Target, Lightbulb, Zap, Briefcase, Code, Loader2 } from 'lucide-react';
 import './Navbar.css';
 
 const BASE_URL = "https://careerintel-w10f.onrender.com";
@@ -53,13 +53,20 @@ const Navbar = ({ toggleSidebar }) => {
 
     // Search state
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState({ roles: [], skills: [] });
+    const [isSearching, setIsSearching] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+
+    // Refs
+    const searchRef = useRef(null);
+    const dropdownRef = useRef(null);
+    const debounceRef = useRef(null);
+    const notificationRef = useRef(null);
 
     // Notifications state
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
-
-    // Ref for outside click detection
-    const notificationRef = useRef(null);
 
     // Fetch user data on mount
     useEffect(() => {
@@ -109,11 +116,143 @@ const Navbar = ({ toggleSidebar }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Handle search input
+    // Close search dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setShowDropdown(false);
+                setSelectedIndex(-1);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Debounced search function
+    const performSearch = useCallback(async (query) => {
+        if (!query || query.trim().length < 1) {
+            setSearchResults({ roles: [], skills: [] });
+            setIsSearching(false);
+            return;
+        }
+
+        setIsSearching(true);
+
+        try {
+            const res = await fetch(`${BASE_URL}/search?q=${encodeURIComponent(query.trim())}`);
+            if (!res.ok) {
+                throw new Error(`Search failed: ${res.status}`);
+            }
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("Invalid response format");
+            }
+            const data = await res.json();
+            // Safely handle response with fallback arrays
+            setSearchResults({
+                roles: Array.isArray(data.roles) ? data.roles : [],
+                skills: Array.isArray(data.skills) ? data.skills : []
+            });
+            setShowDropdown(true);
+        } catch (err) {
+            console.error("Search error:", err);
+            // Safe fallback on error
+            setSearchResults({ roles: [], skills: [] });
+        } finally {
+            setIsSearching(false);
+        }
+    }, []);
+
+    // Handle search input with debounce
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        setSelectedIndex(-1);
+
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+
+        if (!query.trim()) {
+            setSearchResults({ roles: [], skills: [] });
+            setShowDropdown(false);
+            setIsSearching(false);
+            return;
+        }
+
+        debounceRef.current = setTimeout(() => {
+            performSearch(query);
+        }, 300);
+    };
+
+    // Get all flattened results for keyboard navigation
+    const getAllResults = () => {
+        const roles = Array.isArray(searchResults.roles) ? searchResults.roles.map(r => ({ ...r, type: 'role' })) : [];
+        const skills = Array.isArray(searchResults.skills) ? searchResults.skills.map(s => ({ ...s, type: 'skill' })) : [];
+        return [...roles, ...skills];
+    };
+
+    // Handle keyboard navigation
+    const handleKeyDown = (e) => {
+        const allResults = getAllResults();
+
+        if (!showDropdown || allResults.length === 0) {
+            if (e.key === 'Enter' && searchQuery.trim()) {
+                navigate(`/career-recommendations?search=${encodeURIComponent(searchQuery.trim())}`);
+                setSearchQuery('');
+                setShowDropdown(false);
+            }
+            return;
+        }
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                setSelectedIndex(prev => (prev < allResults.length - 1 ? prev + 1 : 0));
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                setSelectedIndex(prev => (prev > 0 ? prev - 1 : allResults.length - 1));
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (selectedIndex >= 0 && allResults[selectedIndex]) {
+                    handleResultClick(allResults[selectedIndex]);
+                } else if (searchQuery.trim()) {
+                    navigate(`/career-recommendations?search=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchQuery('');
+                }
+                setShowDropdown(false);
+                break;
+            case 'Escape':
+                setShowDropdown(false);
+                setSelectedIndex(-1);
+                break;
+            default:
+                break;
+        }
+    };
+
+    // Handle result click
+    const handleResultClick = (result) => {
+        if (result.type === 'role') {
+            navigate(`/career-recommendations?role=${result.id}`);
+        } else {
+            // For skills, search in career recommendations to show roles requiring that skill
+            navigate(`/career-recommendations?search=${encodeURIComponent(result.name)}`);
+        }
+        setSearchQuery('');
+        setShowDropdown(false);
+        setSelectedIndex(-1);
+    };
+
+    // Handle search input enter key (for direct search)
     const handleSearchKeyDown = (e) => {
-        if (e.key === 'Enter' && searchQuery.trim()) {
+        if (e.key === 'Enter' && searchQuery.trim() && !showDropdown) {
             navigate(`/career-recommendations?search=${encodeURIComponent(searchQuery.trim())}`);
             setSearchQuery('');
+            setShowDropdown(false);
         }
     };
 
@@ -130,21 +269,99 @@ const Navbar = ({ toggleSidebar }) => {
         return first + last;
     };
 
+    const allResults = getAllResults();
+    const hasResults = (Array.isArray(searchResults.roles) && searchResults.roles.length > 0) || (Array.isArray(searchResults.skills) && searchResults.skills.length > 0);
+
     return (
         <header className="navbar">
             <div className="navbar-left">
                 <button className="mobile-menu-btn" onClick={toggleSidebar}>
                     <Menu size={20} />
                 </button>
-                <div className="search-bar">
+                <div className="search-bar" ref={searchRef}>
                     <Search size={18} className="search-icon" />
                     <input
                         type="text"
-                        placeholder="Search careers, skills, or courses..."
+                        placeholder="Search careers or skills..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleSearchKeyDown}
+                        onChange={handleSearchChange}
+                        onKeyDown={handleKeyDown}
+                        onFocus={() => searchQuery.trim() && hasResults && setShowDropdown(true)}
                     />
+                    {isSearching && (
+                        <div className="search-loading">
+                            <Loader2 size={16} className="spinner" />
+                        </div>
+                    )}
+
+                    {/* Search Dropdown */}
+                    {showDropdown && (
+                        <div className="search-dropdown" ref={dropdownRef}>
+                            {searchQuery.trim() && !isSearching && !hasResults ? (
+                                <div className="search-empty">
+                                    <p>No results found</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {Array.isArray(searchResults.roles) && searchResults.roles.length > 0 && (
+                                        <div className="search-section">
+                                            <div className="search-section-header">
+                                                <Briefcase size={14} />
+                                                <span>Careers</span>
+                                            </div>
+                                            <div className="search-results">
+                                                {searchResults.roles.map((role, idx) => {
+                                                    const globalIdx = idx;
+                                                    return (
+                                                        <div
+                                                            key={`role-${role.id}`}
+                                                            className={`search-result-item ${selectedIndex === globalIdx ? 'selected' : ''}`}
+                                                            onClick={() => handleResultClick({ ...role, type: 'role' })}
+                                                            onMouseEnter={() => setSelectedIndex(globalIdx)}
+                                                        >
+                                                            <Briefcase size={16} className="result-icon career-icon" />
+                                                            <div className="result-content">
+                                                                <span className="result-name">{role.name}</span>
+                                                                <span className="result-category">{role.category}</span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {Array.isArray(searchResults.skills) && searchResults.skills.length > 0 && (
+                                        <div className="search-section">
+                                            <div className="search-section-header">
+                                                <Code size={14} />
+                                                <span>Skills</span>
+                                            </div>
+                                            <div className="search-results">
+                                                {searchResults.skills.map((skill, idx) => {
+                                                    const globalIdx = (Array.isArray(searchResults.roles) ? searchResults.roles.length : 0) + idx;
+                                                    return (
+                                                        <div
+                                                            key={`skill-${skill.id}`}
+                                                            className={`search-result-item ${selectedIndex === globalIdx ? 'selected' : ''}`}
+                                                            onClick={() => handleResultClick({ ...skill, type: 'skill' })}
+                                                            onMouseEnter={() => setSelectedIndex(globalIdx)}
+                                                        >
+                                                            <Code size={16} className="result-icon skill-icon" />
+                                                            <div className="result-content">
+                                                                <span className="result-name">{skill.name}</span>
+                                                                <span className="result-category">{skill.category}</span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 

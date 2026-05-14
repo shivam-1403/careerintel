@@ -65,6 +65,10 @@ const ProgressTracker = () => {
 
             const headers = { Authorization: `Bearer ${token}` };
 
+            // Local variables for calculations
+            let localSkillMatchPercent = 0;
+            let localResumeScorePercent = 0;
+
             // 1. Fetch user profile (for target_role_id)
             const profileRes = await fetch(`${BASE_URL}/user/profile`, { headers });
             if (!profileRes.ok) throw new Error("Failed to fetch profile");
@@ -105,6 +109,7 @@ const ProgressTracker = () => {
                         ? Math.round((matched.length / totalRequired) * 100)
                         : 0;
                     setSkillMatchPercent(matchPercent);
+                    localSkillMatchPercent = matchPercent;
                 }
             } else {
                 setSkillMatchPercent(0);
@@ -139,7 +144,9 @@ const ProgressTracker = () => {
             if (statsRes.ok) {
                 const statsData = await statsRes.json();
                 setDashboardStats(statsData);
-                setResumeScorePercent(statsData.latest_score || 0);
+                const latestScore = statsData.latest_score || 0;
+                setResumeScorePercent(latestScore);
+                localResumeScorePercent = latestScore;
 
                 // Calculate performance summary
                 const scores = historyData.map(h => h.score);
@@ -159,14 +166,8 @@ const ProgressTracker = () => {
                 });
             }
 
-            // 6. Calculate overall progress
-            // Assuming roadmap completion = 0 (not tracked yet)
-            const roadmapCompletion = 0;
-            const overall = Math.round(
-                (0.4 * skillMatchPercent) +
-                (0.3 * resumeScorePercent) +
-                (0.3 * roadmapCompletion)
-            );
+            // 6. Calculate overall progress using local variables (not state)
+            const overall = Math.round((localSkillMatchPercent + localResumeScorePercent) / 2);
             setOverallProgress(overall);
 
         } catch (err) {
@@ -350,19 +351,37 @@ const ProgressTracker = () => {
                                         data={skillDistributionData}
                                         cx="50%"
                                         cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={90}
-                                        paddingAngle={5}
+                                        innerRadius={70}
+                                        outerRadius={95}
+                                        paddingAngle={2}
                                         dataKey="value"
-                                        label={({ name, value }) => `${name}: ${value}`}
-                                        labelLine={false}
+                                        strokeWidth={0}
                                     >
                                         {skillDistributionData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
                                         ))}
                                     </Pie>
+                                    {/* Center text showing skill match percentage */}
+                                    <text
+                                        x="50%"
+                                        y="50%"
+                                        textAnchor="middle"
+                                        dominantBaseline="middle"
+                                        style={{ fontSize: 22, fontWeight: 700, fill: '#1e293b' }}
+                                    >
+                                        <tspan dy="-20">{skillMatchPercent}%</tspan>
+                                        <tspan x="50%" dy="16" style={{ fontSize: 11, fill: '#64748b' }}>Match</tspan>
+                                    </text>
                                     <Tooltip formatter={(value) => [`${value} skills`, '']} />
-                                    <Legend />
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        height={36}
+                                        formatter={(value, entry) => (
+                                            <span style={{ color: '#1e293b', fontSize: 12 }}>
+                                                {value}: {entry.payload.value}
+                                            </span>
+                                        )}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
@@ -438,7 +457,7 @@ const ProgressTracker = () => {
                             </div>
                             <div className="stat-row">
                                 <span>Skills Acquired</span>
-                                <span>{userSkills.length}</span>
+                                <span>{matchedSkills.length}</span>
                             </div>
                             <div className="stat-row">
                                 <span>Required Skills</span>

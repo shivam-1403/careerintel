@@ -13,6 +13,11 @@ import Landing from './pages/Landing';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import ForgotPassword from './pages/Auth/ForgotPassword';
+import About from './pages/Info/About';
+import Contact from './pages/Info/Contact';
+import Pricing from './pages/Info/Pricing';
+import Privacy from './pages/Info/Privacy';
+import Terms from './pages/Info/Terms';
 import Dashboard from './pages/Student/Dashboard';
 import Profile from './pages/Student/Profile';
 import ResumeAnalyzer from './pages/Student/ResumeAnalyzer';
@@ -33,6 +38,11 @@ function App() {
         <Route path="/login" element={<BaseLayout><Login /></BaseLayout>} />
         <Route path="/signup" element={<BaseLayout><Signup /></BaseLayout>} />
         <Route path="/forgot-password" element={<BaseLayout><ForgotPassword /></BaseLayout>} />
+        <Route path="/about" element={<BaseLayout><About /></BaseLayout>} />
+        <Route path="/contact" element={<BaseLayout><Contact /></BaseLayout>} />
+        <Route path="/pricing" element={<BaseLayout><Pricing /></BaseLayout>} />
+        <Route path="/privacy" element={<BaseLayout><Privacy /></BaseLayout>} />
+        <Route path="/terms" element={<BaseLayout><Terms /></BaseLayout>} />
 
         {/* Client Side Routes - Student */}
         <Route
