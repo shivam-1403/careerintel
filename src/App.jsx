@@ -25,8 +25,10 @@ import CareerRecommendations from './pages/Student/CareerRecommendations';
 import SkillGapAnalyzer from './pages/Student/SkillGapAnalyzer';
 import LearningPath from './pages/Student/LearningPath';
 import ProgressTracker from './pages/Student/ProgressTracker';
-import CareerDetails from './pages/Student/CareerDetails';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+
+// Import CareerDetails for the new career details route
+import CareerDetails from './pages/Student/CareerDetails';
 
 function App() {
   return (
@@ -34,96 +36,97 @@ function App() {
       <ToastProvider>
         <ScrollToTop />
         <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<BaseLayout><Landing /></BaseLayout>} />
-        <Route path="/login" element={<BaseLayout><Login /></BaseLayout>} />
-        <Route path="/signup" element={<BaseLayout><Signup /></BaseLayout>} />
-        <Route path="/forgot-password" element={<BaseLayout><ForgotPassword /></BaseLayout>} />
-        <Route path="/about" element={<BaseLayout><About /></BaseLayout>} />
-        <Route path="/contact" element={<BaseLayout><Contact /></BaseLayout>} />
-        <Route path="/pricing" element={<BaseLayout><Pricing /></BaseLayout>} />
-        <Route path="/privacy" element={<BaseLayout><Privacy /></BaseLayout>} />
-        <Route path="/terms" element={<BaseLayout><Terms /></BaseLayout>} />
+          {/* Public Routes */}
+          <Route path="/" element={<BaseLayout><Landing /></BaseLayout>} />
+          <Route path="/login" element={<BaseLayout><Login /></BaseLayout>} />
+          <Route path="/signup" element={<BaseLayout><Signup /></BaseLayout>} />
+          <Route path="/forgot-password" element={<BaseLayout><ForgotPassword /></BaseLayout>} />
+          <Route path="/about" element={<BaseLayout><About /></BaseLayout>} />
+          <Route path="/contact" element={<BaseLayout><Contact /></BaseLayout>} />
+          <Route path="/pricing" element={<BaseLayout><Pricing /></BaseLayout>} />
+          <Route path="/privacy" element={<BaseLayout><Privacy /></BaseLayout>} />
+          <Route path="/terms" element={<BaseLayout><Terms /></BaseLayout>} />
 
-        {/* Client Side Routes - Student */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <MainLayout><Dashboard /></MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <MainLayout><Profile /></MainLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/resume-analyzer" 
-          element={
-            <ProtectedRoute>
-              <MainLayout><ResumeAnalyzer /></MainLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/career-recommendations" 
-          element={
-            <ProtectedRoute>
-              <MainLayout><CareerRecommendations /></MainLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/skill-gap" 
-          element={
-            <ProtectedRoute>
-              <MainLayout><SkillGapAnalyzer /></MainLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/learning-path" 
-          element={
-            <ProtectedRoute>
-              <MainLayout><LearningPath /></MainLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/progress" 
-          element={
-            <ProtectedRoute>
-              <MainLayout><ProgressTracker /></MainLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route
-          path="/career/:id"
-          element={
-            <ProtectedRoute>
-              <MainLayout><CareerDetails /></MainLayout>
-            </ProtectedRoute>
-          }
-        />
+          {/* Client Side Routes - Student */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <MainLayout><Dashboard /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <MainLayout><Profile /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resume-analyzer"
+            element={
+              <ProtectedRoute>
+                <MainLayout><ResumeAnalyzer /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/career-recommendations"
+            element={
+              <ProtectedRoute>
+                <MainLayout><CareerRecommendations /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/skill-gap"
+            element={
+              <ProtectedRoute>
+                <MainLayout><SkillGapAnalyzer /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/learning-path"
+            element={
+              <ProtectedRoute>
+                <MainLayout><LearningPath /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/progress"
+            element={
+              <ProtectedRoute>
+                <MainLayout><ProgressTracker /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          {/* New career details route */}
+          <Route
+            path="/career/:id"
+            element={
+              <ProtectedRoute>
+                <MainLayout><CareerDetails /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Admin Routes */}
-        <Route 
-          path="/admin" 
-          element={
-            <ProtectedRoute>
-              <MainLayout><AdminDashboard /></MainLayout>
-            </ProtectedRoute>
-          } 
-        />
+          {/* Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <MainLayout><AdminDashboard /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* 404 Redirect */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* 404 Redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </ToastProvider>
     </Router>
   );

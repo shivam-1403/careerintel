@@ -263,8 +263,8 @@ const Navbar = ({ toggleSidebar }) => {
             return;
         }
 
-        // Skills: no navigation; show notice and keep dropdown + results visible
-        setSearchNotice('Skill exploration coming soon');
+        // Skills: do not navigate, show 'Coming Soon' and keep dropdown/results visible
+        setSearchNotice('Coming Soon');
     };
 
     // Toggle notifications
