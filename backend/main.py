@@ -594,6 +594,14 @@ def _required_skills_payload(role_id: int, db: Session):
 
 
 @app.get("/career/{role_id}")
+def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+):
+    try:
+        return get_current_user(credentials, db)
+    except:
+        return None
 def get_career_details(
     role_id: int,
     db: Session = Depends(get_db),
