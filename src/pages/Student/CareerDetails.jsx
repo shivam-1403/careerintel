@@ -8,9 +8,16 @@ import './CareerDetails.css';
 
 const API_BASE = 'https://careerintel-w10f.onrender.com';
 
-const authHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem('token')}`
-});
+// Returns headers with Authorization if JWT is available; safe for both guests and logged-in users
+const authHeaders = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        return {
+            Authorization: `Bearer ${token}`,
+        };
+    }
+    return {};
+};
 
 const CareerDetails = () => {
     const { id } = useParams();
@@ -24,6 +31,7 @@ const CareerDetails = () => {
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState(null);
 
+    // Always include token in headers if present (fix for personalized analytics)
     const loadCareer = useCallback(async () => {
         if (!id) {
             setError('Invalid career link.');
@@ -35,8 +43,13 @@ const CareerDetails = () => {
         setError(null);
 
         try {
+            const headers = {
+                ...authHeaders(),
+            };
+
             const res = await fetch(`${API_BASE}/career/${encodeURIComponent(id)}`, {
-                headers: authHeaders()
+                headers,
+                credentials: 'include', // include cookies if any; does not hurt guest users
             });
 
             if (res.status === 404) {
@@ -97,7 +110,7 @@ const CareerDetails = () => {
             missing_skills: career.missing_skills,
         };
 
-        // Call backend endpoint for AI insight
+        // Always include token in headers for AI insight request as well
         fetch(`${API_BASE}/career/${encodeURIComponent(id)}/ai_insight`, {
             headers: {
                 ...authHeaders(),
