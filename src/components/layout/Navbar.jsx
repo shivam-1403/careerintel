@@ -5,13 +5,9 @@ import './Navbar.css';
 
 const BASE_URL = "https://careerintel-w10f.onrender.com";
 
-const normalizeSearchResults = (payload) => ({
-    roles: Array.isArray(payload?.roles) ? payload.roles.filter(Boolean) : [],
-    skills: Array.isArray(payload?.skills) ? payload.skills.filter(Boolean) : []
-});
-
 // Modern notification data structure
 const generateNotifications = () => {
+    const now = new Date();
     const notifications = [
         {
             id: 1,
@@ -123,14 +119,6 @@ const Navbar = ({ toggleSidebar }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    useEffect(() => {
-        return () => {
-            if (debounceRef.current) {
-                clearTimeout(debounceRef.current);
-            }
-        };
-    }, []);
-
     // Close search dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -166,7 +154,11 @@ const Navbar = ({ toggleSidebar }) => {
                 throw new Error("Invalid response format");
             }
             const data = await res.json();
-            setSearchResults(normalizeSearchResults(data));
+            // Safely handle response with fallback arrays
+            setSearchResults({
+                roles: Array.isArray(data.roles) ? data.roles : [],
+                skills: Array.isArray(data.skills) ? data.skills : []
+            });
             setShowDropdown(true);
         } catch (err) {
             console.error("Search error:", err);
@@ -181,7 +173,6 @@ const Navbar = ({ toggleSidebar }) => {
     const handleSearchChange = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
-        setShowDropdown(true);
         setSelectedIndex(-1);
 
         if (debounceRef.current) {
@@ -203,9 +194,8 @@ const Navbar = ({ toggleSidebar }) => {
 
     // Get all flattened results for keyboard navigation
     const getAllResults = () => {
-        const { roles: safeRoles, skills: safeSkills } = normalizeSearchResults(searchResults);
-        const roles = safeRoles.map(r => ({ ...r, type: 'role' }));
-        const skills = safeSkills.map(s => ({ ...s, type: 'skill' }));
+        const roles = Array.isArray(searchResults.roles) ? searchResults.roles.map(r => ({ ...r, type: 'role' })) : [];
+        const skills = Array.isArray(searchResults.skills) ? searchResults.skills.map(s => ({ ...s, type: 'skill' })) : [];
         return [...roles, ...skills];
     };
 
@@ -250,21 +240,16 @@ const Navbar = ({ toggleSidebar }) => {
     // Handle result click
     const handleResultClick = (result) => {
         if (result.type === 'role') {
-            const roleId = result.id ?? result.role_id;
-            if (!roleId) {
-                setSearchNotice('Career details unavailable');
-                return;
-            }
             setSearchNotice('');
-            navigate(`/career/${roleId}`);
+            navigate(`/career/${result.id}`);
             setSearchQuery('');
             setShowDropdown(false);
             setSelectedIndex(-1);
             return;
         }
 
-        // Skills: do not navigate, show 'Coming Soon' and keep dropdown/results visible
-        setSearchNotice('Coming Soon');
+        // Skills: no navigation; show notice and keep dropdown + results visible
+        setSearchNotice('Skill exploration coming soon');
     };
 
     // Toggle notifications
@@ -280,8 +265,8 @@ const Navbar = ({ toggleSidebar }) => {
         return first + last;
     };
 
-    const { roles: safeRoles, skills: safeSkills } = normalizeSearchResults(searchResults);
-    const hasResults = safeRoles.length > 0 || safeSkills.length > 0;
+    const allResults = getAllResults();
+    const hasResults = (Array.isArray(searchResults.roles) && searchResults.roles.length > 0) || (Array.isArray(searchResults.skills) && searchResults.skills.length > 0);
 
     return (
         <header className="navbar">
@@ -297,7 +282,7 @@ const Navbar = ({ toggleSidebar }) => {
                         value={searchQuery}
                         onChange={handleSearchChange}
                         onKeyDown={handleKeyDown}
-                        onFocus={() => searchQuery.trim() && setShowDropdown(true)}
+                        onFocus={() => searchQuery.trim() && hasResults && setShowDropdown(true)}
                     />
                     {isSearching && (
                         <div className="search-loading">
@@ -306,7 +291,7 @@ const Navbar = ({ toggleSidebar }) => {
                     )}
 
                     {/* Search Dropdown */}
-                    {showDropdown && searchQuery.trim() && (
+                    {showDropdown && (
                         <div className="search-dropdown" ref={dropdownRef}>
                             {searchNotice ? (
                                 <div className="search-notice" role="status" aria-live="polite">
@@ -319,27 +304,26 @@ const Navbar = ({ toggleSidebar }) => {
                                 </div>
                             ) : (
                                 <>
-                                    {safeRoles.length > 0 && (
+                                    {Array.isArray(searchResults.roles) && searchResults.roles.length > 0 && (
                                         <div className="search-section">
                                             <div className="search-section-header">
                                                 <Briefcase size={14} />
                                                 <span>Careers</span>
                                             </div>
                                             <div className="search-results">
-                                                {safeRoles.map((role, idx) => {
+                                                {searchResults.roles.map((role, idx) => {
                                                     const globalIdx = idx;
-                                                    const roleId = role?.id ?? role?.role_id;
                                                     return (
                                                         <div
-                                                            key={`role-${roleId || idx}`}
+                                                            key={`role-${role.id}`}
                                                             className={`search-result-item ${selectedIndex === globalIdx ? 'selected' : ''}`}
-                                                            onClick={() => handleResultClick({ ...role, id: roleId, type: 'role' })}
+                                                            onClick={() => handleResultClick({ ...role, type: 'role' })}
                                                             onMouseEnter={() => setSelectedIndex(globalIdx)}
                                                         >
                                                             <Briefcase size={16} className="result-icon career-icon" />
                                                             <div className="result-content">
-                                                                <span className="result-name">{role?.name || role?.career || 'Career'}</span>
-                                                                <span className="result-category">{role?.category || 'Career'}</span>
+                                                                <span className="result-name">{role.name}</span>
+                                                                <span className="result-category">{role.category}</span>
                                                             </div>
                                                         </div>
                                                     );
@@ -348,18 +332,18 @@ const Navbar = ({ toggleSidebar }) => {
                                         </div>
                                     )}
 
-                                    {safeSkills.length > 0 && (
+                                    {Array.isArray(searchResults.skills) && searchResults.skills.length > 0 && (
                                         <div className="search-section">
                                             <div className="search-section-header">
                                                 <Code size={14} />
                                                 <span>Skills</span>
                                             </div>
                                             <div className="search-results">
-                                                {safeSkills.map((skill, idx) => {
-                                                    const globalIdx = safeRoles.length + idx;
+                                                {searchResults.skills.map((skill, idx) => {
+                                                    const globalIdx = (Array.isArray(searchResults.roles) ? searchResults.roles.length : 0) + idx;
                                                     return (
                                                         <div
-                                                            key={`skill-${skill?.id || skill?.name || idx}`}
+                                                            key={`skill-${skill.id}`}
                                                             className={`search-result-item search-result-item--skill ${selectedIndex === globalIdx ? 'selected' : ''}`}
                                                             onClick={() => handleResultClick({ ...skill, type: 'skill' })}
                                                             onMouseEnter={() => setSelectedIndex(globalIdx)}
@@ -367,8 +351,8 @@ const Navbar = ({ toggleSidebar }) => {
                                                             <Code size={16} className="result-icon skill-icon" />
                                                             <div className="result-content result-content--skill">
                                                                 <div className="result-text-stack">
-                                                                    <span className="result-name">{skill?.name || 'Skill'}</span>
-                                                                    <span className="result-category">{skill?.category || 'Skill'}</span>
+                                                                    <span className="result-name">{skill.name}</span>
+                                                                    <span className="result-category">{skill.category}</span>
                                                                 </div>
                                                                 <span className="search-skill-soon-badge" title="Skill pages are not available yet">
                                                                     Coming soon

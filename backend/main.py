@@ -20,15 +20,11 @@ from jose import JWTError, jwt
 from services.career_engine import extract_skills_from_text, compare_skills_with_roles, recommend_roles_for_user, get_skill_gap_for_role
 from services.ats_engine import calculate_resume_quality
 import time
-import json
-import re
-from typing import Optional
 from datetime import datetime, timedelta
 
 
 app = FastAPI()
 security = HTTPBearer()
-security_optional = HTTPBearer(auto_error=False)
 
 app.add_middleware(
     CORSMiddleware,
@@ -90,174 +86,6 @@ Keep it encouraging but honest. No bullet points, just natural paragraphs."""
     except Exception as e:
         print(f"AI Insight Error: {e}")
         return None
-
-
-def _truncate_insight_text(s: str, max_len: int = 220) -> str:
-    s = (s or "").strip().replace("\n", " ")
-    if len(s) <= max_len:
-        return s
-    return s[: max_len - 1].rstrip() + "…"
-
-
-_INSIGHT_KEYS = (
-    "suitability_insight",
-    "strongest_matching_area",
-    "biggest_skill_gap",
-    "recommendation_summary",
-)
-
-
-def _normalize_career_insights_dict(data: dict) -> Optional[dict]:
-    if not isinstance(data, dict):
-        return None
-    out = {}
-    for k in _INSIGHT_KEYS:
-        v = data.get(k)
-        if v is None:
-            return None
-        if not isinstance(v, str):
-            v = str(v)
-        v = v.strip()
-        if not v:
-            return None
-        out[k] = _truncate_insight_text(v, 240)
-    return out
-
-
-def _parse_career_insights_json(content: str) -> Optional[dict]:
-    if not content or not str(content).strip():
-        return None
-    text = str(content).strip()
-    if text.startswith("```"):
-        text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE)
-        text = re.sub(r"\s*```\s*$", "", text)
-    try:
-        data = json.loads(text)
-        return _normalize_career_insights_dict(data)
-    except (json.JSONDecodeError, TypeError, ValueError):
-        pass
-    m = re.search(r"\{[\s\S]*\}", text)
-    if not m:
-        return None
-    try:
-        data = json.loads(m.group())
-        return _normalize_career_insights_dict(data)
-    except (json.JSONDecodeError, TypeError, ValueError):
-        return None
-
-
-def generate_career_insights_groq(context: dict) -> Optional[dict]:
-    """Structured career insights via Groq; returns None if client missing or model errors."""
-    try:
-        client = get_groq_client()
-        if not client:
-            return None
-
-        system = (
-            "You are a concise career coach. Output only valid JSON, no markdown, no commentary. "
-            "Each string value must stay under 200 characters, professional and realistic."
-        )
-        user_msg = (
-            "Use this context (do not invent skills or scores not present):\n"
-            f"{json.dumps(context, ensure_ascii=False)}\n\n"
-            "Return exactly one JSON object with keys: "
-            '"suitability_insight","strongest_matching_area","biggest_skill_gap","recommendation_summary".\n'
-            "If personalized is false, write generally for someone exploring the role—do not claim a user match score.\n"
-            "If personalized is true, ground statements in readiness_percent and the matched/missing lists.\n"
-            "biggest_skill_gap: name the most important missing area when missing_skills is non-empty; "
-            "otherwise acknowledge strong coverage briefly."
-        )
-
-        response = client.chat.completions.create(
-            model="llama3-8b-8192",
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user_msg},
-            ],
-            temperature=0.35,
-            max_tokens=420,
-        )
-        raw = response.choices[0].message.content
-        return _parse_career_insights_json(raw)
-    except Exception as e:
-        print(f"Career insights Groq error: {e}")
-        return None
-
-
-def _build_fallback_career_insights(
-    role: Role,
-    gap: Optional[dict],
-    user: Optional[User],
-    has_personalized_gap: bool,
-) -> dict:
-    """Deterministic short copy when Groq is unavailable or returns invalid JSON."""
-    name = role.name
-    cat = role.category or "this field"
-
-    if has_personalized_gap and gap:
-        sc = int(gap["score"])
-        matched = gap.get("matched_skills") or []
-        tech = gap.get("technical_gaps") or []
-        soft = gap.get("soft_skill_gaps") or []
-
-        suit = (
-            f"At roughly {sc}% weighted readiness for {name}, you "
-            + ("have a workable baseline—tighten remaining gaps next." if sc >= 45 else "are early; prioritize foundational skills first.")
-        )
-        if matched:
-            strongest = f"{matched[0]} is a clear strength for this role map."
-            if len(matched) > 1:
-                strongest = f"{matched[0]} leads among {len(matched)} aligned skills."
-        else:
-            strongest = "No overlaps yet—start with the highest-weight required skills."
-
-        biggest = "Focus on the highest-priority missing skills for this role."
-        if tech:
-            biggest = f"{tech[0]['name']} is a weighted gap worth closing first."
-        elif soft:
-            biggest = f"{soft[0]['name']} is a key development area for this track."
-
-        summary = "Tackle top-weight gaps, validate with projects or certifications, then revisit match."
-        if sc >= 80:
-            summary = "Strengths look solid—polish remaining gaps and rehearse impact stories."
-
-        return {
-            "suitability_insight": _truncate_insight_text(suit),
-            "strongest_matching_area": _truncate_insight_text(strongest),
-            "biggest_skill_gap": _truncate_insight_text(biggest),
-            "recommendation_summary": _truncate_insight_text(summary),
-        }
-
-    if user and not has_personalized_gap:
-        return {
-            "suitability_insight": _truncate_insight_text(
-                f"{name} is available, but skill-to-role mapping is incomplete—treat the role description as your primary guide for now."
-            ),
-            "strongest_matching_area": _truncate_insight_text(
-                "Mapping is incomplete; highlight transferable skills from your profile in applications."
-            ),
-            "biggest_skill_gap": _truncate_insight_text(
-                "Once skills are mapped to this role, a precise gap list will appear here."
-            ),
-            "recommendation_summary": _truncate_insight_text(
-                "Keep building core skills for this track and check back after data updates."
-            ),
-        }
-
-    return {
-        "suitability_insight": _truncate_insight_text(
-            f"{name} ({cat}) typically rewards candidates who meet its core skill profile—use the role map as your checklist."
-        ),
-        "strongest_matching_area": _truncate_insight_text(
-            "Sign in and add skills to see where you already align with this role."
-        ),
-        "biggest_skill_gap": _truncate_insight_text(
-            "Add your strongest skills to the profile to highlight natural leverage points."
-        ),
-        "recommendation_summary": _truncate_insight_text(
-            "Review required skills, pick two to deepen next, and pair learning with small portfolio evidence."
-        ),
-    }
 
 
 def extract_text_from_pdf(file):
@@ -515,24 +343,6 @@ def get_current_user(
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
-
-
-def get_current_user_optional(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_optional),
-    db: Session = Depends(get_db),
-):
-    if credentials is None:
-        return None
-    token = credentials.credentials
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
-    except JWTError:
-        return None
-    if not email:
-        return None
-    return db.query(User).filter(User.email == email).first()
-
 
 @app.get("/user/profile")
 def get_profile(
@@ -849,49 +659,6 @@ def get_career_details(
     response["empty_states"]["no_missing_skills"] = len(missing_names) == 0
 
     return response
-
-
-@app.get("/career/{role_id}/insights")
-def get_career_insights(
-    role_id: int,
-    db: Session = Depends(get_db),
-    user: Optional[User] = Depends(get_current_user_optional),
-):
-    """
-    Concise AI career insights (Groq). Falls back to deterministic copy if AI is unavailable.
-    Reuses get_skill_gap_for_role for personalized context.
-    """
-    role = db.query(Role).filter(Role.id == role_id).first()
-    if not role:
-        raise HTTPException(status_code=404, detail="Career not found")
-
-    required_skills = _required_skills_payload(role_id, db)
-    gap = get_skill_gap_for_role(user.id, role_id, db) if user else None
-    has_personalized_gap = gap is not None
-
-    missing_names = []
-    if gap:
-        gaps_combined = gap["technical_gaps"] + gap["soft_skill_gaps"]
-        gaps_sorted = sorted(gaps_combined, key=lambda x: x["priority"], reverse=True)
-        missing_names = [g["name"] for g in gaps_sorted]
-
-    context = {
-        "role_name": role.name,
-        "role_category": role.category,
-        "description_excerpt": _truncate_insight_text((role.description or "").strip(), 400),
-        "personalized": has_personalized_gap,
-        "readiness_percent": gap["score"] if gap else None,
-        "matched_skills": (gap["matched_skills"] if gap else [])[:12],
-        "missing_skills": missing_names[:12],
-        "top_required_skills": [r["name"] for r in required_skills[:12]],
-    }
-
-    parsed = generate_career_insights_groq(context)
-    if parsed:
-        return {"insights": parsed, "source": "ai"}
-
-    fb = _build_fallback_career_insights(role, gap, user, has_personalized_gap)
-    return {"insights": fb, "source": "fallback"}
 
 
 class RoadmapRequest(BaseModel):
