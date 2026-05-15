@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+﻿import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Bell, Menu, TrendingUp, Target, Lightbulb, Zap, Briefcase, Code, Loader2 } from 'lucide-react';
 import './Navbar.css';
@@ -173,6 +173,7 @@ const Navbar = ({ toggleSidebar }) => {
     const handleSearchChange = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
+        setShowDropdown(true);
         setSelectedIndex(-1);
 
         if (debounceRef.current) {
@@ -291,7 +292,7 @@ const Navbar = ({ toggleSidebar }) => {
                     )}
 
                     {/* Search Dropdown */}
-                    {showDropdown && (
+                    {(showDropdown || (searchQuery.trim() && hasResults)) && (
                         <div className="search-dropdown" ref={dropdownRef}>
                             {searchNotice ? (
                                 <div className="search-notice" role="status" aria-live="polite">
