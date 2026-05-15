@@ -25,6 +25,8 @@ from datetime import datetime, timedelta
 
 app = FastAPI()
 security = HTTPBearer()
+# Add optional security dependency for optional auth
+security_optional = HTTPBearer(auto_error=False)
 
 app.add_middleware(
     CORSMiddleware,
@@ -595,13 +597,32 @@ def _required_skills_payload(role_id: int, db: Session):
 
 @app.get("/career/{role_id}")
 def get_current_user_optional(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security_optional),
     db: Session = Depends(get_db)
 ):
-    try:
-        return get_current_user(credentials, db)
-    except:
+    """
+    Optional user auth helper for career personalization.
+    Returns a User if JWT is valid, otherwise None. Logs safe error details.
+    """
+    if credentials is None:
+        # No token provided
         return None
+    try:
+        # credentials.credentials is the token string
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        if not email:
+            return None
+        user = db.query(User).filter(User.email == email).first()
+        return user
+    except JWTError as e:
+        print(f"Optional auth JWT error: {str(e)}")
+        return None
+    except Exception as ex:
+        print(f"Optional auth unexpected error: {str(ex)}")
+        return None
+
 def get_career_details(
     role_id: int,
     db: Session = Depends(get_db),
