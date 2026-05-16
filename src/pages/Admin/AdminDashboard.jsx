@@ -1,13 +1,15 @@
 ﻿import React from 'react';
 import {
-    Users,
-    Briefcase,
+    Brain,
+    Sparkles,
     Target,
     Activity,
     ArrowUpRight,
     ArrowDownRight,
     Search,
-    Filter
+    Filter,
+    FileText,
+    Zap
 } from 'lucide-react';
 import {
     PieChart,
@@ -25,10 +27,10 @@ import Card from '../../components/ui/Card';
 import './AdminDashboard.css';
 
 const careerStats = [
-    { name: 'Software Eng', value: 400 },
-    { name: 'Data Sci', value: 300 },
-    { name: 'UI/UX Design', value: 200 },
-    { name: 'Product Mgmt', value: 150 },
+    { name: 'Data Scientist', value: 450 },
+    { name: 'AI Engineer', value: 380 },
+    { name: 'Cloud Architect', value: 290 },
+    { name: 'Product Manager', value: 200 },
 ];
 
 const skillGapData = [
@@ -46,66 +48,65 @@ const AdminDashboard = () => {
         <div className="admin-dashboard">
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">Admin Command Center</h1>
-                    <p className="page-subtitle">Monitoring platform growth and student career trends.</p>
+                    <h1 className="page-title">Platform Intelligence Dashboard</h1>
+                    <p className="page-subtitle">AI Career Intelligence Control Center for platform insights and growth.</p>
                 </div>
                 <div className="header-actions">
                     <div className="search-box">
                         <Search size={18} />
-                        <input type="text" placeholder="Search students..." />
+                        <input type="text" placeholder="Search insights..." />
                     </div>
-                    <button className="icon-btn"><Filter size={20} /></button>
                 </div>
             </div>
 
             <div className="admin-stats-grid">
                 <Card className="admin-stat-card">
                     <div className="asc-header">
-                        <div className="asc-icon purple"><Users size={20} /></div>
+                        <div className="asc-icon purple"><Brain size={20} /></div>
                         <span className="asc-trend positive"><ArrowUpRight size={14} /> 12%</span>
                     </div>
                     <div className="asc-content">
-                        <span className="asc-label">Total Active Students</span>
+                        <span className="asc-label">Total Career Analyses</span>
                         <h2 className="asc-value">12,845</h2>
                     </div>
                 </Card>
 
                 <Card className="admin-stat-card">
                     <div className="asc-header">
-                        <div className="asc-icon blue"><Briefcase size={20} /></div>
-                        <span className="asc-trend positive"><ArrowUpRight size={14} /> 8%</span>
+                        <div className="asc-icon blue"><Target size={20} /></div>
+                        <span className="asc-trend positive"><ArrowUpRight size={14} /> 4%</span>
                     </div>
                     <div className="asc-content">
-                        <span className="asc-label">Learning Paths Generated</span>
-                        <h2 className="asc-value">45,210</h2>
+                        <span className="asc-label">Average Readiness Score</span>
+                        <h2 className="asc-value">72%</h2>
                     </div>
                 </Card>
 
                 <Card className="admin-stat-card">
                     <div className="asc-header">
-                        <div className="asc-icon green"><Target size={20} /></div>
-                        <span className="asc-trend negative"><ArrowDownRight size={14} /> 3%</span>
+                        <div className="asc-icon green"><FileText size={20} /></div>
+                        <span className="asc-trend positive"><ArrowUpRight size={14} /> 18%</span>
                     </div>
                     <div className="asc-content">
-                        <span className="asc-label">Avg Skill Gap Score</span>
-                        <h2 className="asc-value">42%</h2>
+                        <span className="asc-label">Resume Scans This Week</span>
+                        <h2 className="asc-value">3,420</h2>
                     </div>
                 </Card>
 
                 <Card className="admin-stat-card">
                     <div className="asc-header">
-                        <div className="asc-icon orange"><Activity size={20} /></div>
+                        <div className="asc-icon orange"><Sparkles size={20} /></div>
                         <span className="asc-trend positive"><ArrowUpRight size={14} /> 24%</span>
                     </div>
                     <div className="asc-content">
-                        <span className="asc-label">Monthly Active Users</span>
-                        <h2 className="asc-value">8,920</h2>
+                        <span className="asc-label">AI Insights Generated</span>
+                        <h2 className="asc-value">15,200</h2>
                     </div>
                 </Card>
             </div>
 
             <div className="admin-charts-grid">
-                <Card title="Popular Career Choices" subtitle="The most frequent target careers selected by students.">
+                <Card title="Trending AI Career Paths" subtitle="Fastest-growing career ecosystems by target volume." className="admin-card-glass">
                     <div className="chart-container">
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
@@ -113,16 +114,19 @@ const AdminDashboard = () => {
                                     data={careerStats}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
+                                    innerRadius={65}
+                                    outerRadius={90}
+                                    paddingAngle={6}
                                     dataKey="value"
+                                    stroke="transparent"
                                 >
                                     {careerStats.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <RechartsTooltip />
+                                <RechartsTooltip
+                                    contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--card)', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="chart-legend">
@@ -136,7 +140,7 @@ const AdminDashboard = () => {
                     </div>
                 </Card>
 
-                <Card title="Common Missing Skills" subtitle="The most frequent gaps identified across all students.">
+                <Card title="Workforce Skill Gap Intelligence" subtitle="AI-identified missing capabilities across student roadmap trajectories." className="admin-card-glass">
                     <div className="chart-container">
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={skillGapData} layout="vertical">
@@ -151,14 +155,14 @@ const AdminDashboard = () => {
                 </Card>
             </div>
 
-            <Card title="Recent Platform Activity" className="mt-6">
+            <Card title="Recent AI Platform Activity" className="mt-6 admin-card-glass">
                 <div className="admin-table-container">
-                    <table className="admin-table">
+                    <table className="admin-table ai-feed-table">
                         <thead>
                             <tr>
-                                <th>Student</th>
-                                <th>Action</th>
-                                <th>Target Career</th>
+                                <th>Insight Event</th>
+                                <th>Target Role</th>
+                                <th>Intelligence Result</th>
                                 <th>Time</th>
                             </tr>
                         </thead>
@@ -166,35 +170,46 @@ const AdminDashboard = () => {
                             <tr>
                                 <td>
                                     <div className="student-info">
-                                        <div className="avatar sm">AS</div>
-                                        <span>Alice Smith</span>
+                                        <div className="avatar sm bg-purple-light"><Sparkles size={14} className="purple" /></div>
+                                        <span>Roadmap Generation</span>
                                     </div>
                                 </td>
-                                <td>Generated Roadmap</td>
                                 <td>Data Scientist</td>
+                                <td><span className="ai-badge ai-badge-success">Score +12%</span></td>
                                 <td>2 mins ago</td>
                             </tr>
                             <tr>
                                 <td>
                                     <div className="student-info">
-                                        <div className="avatar sm">BJ</div>
-                                        <span>Bob Johnson</span>
+                                        <div className="avatar sm bg-blue-light"><FileText size={14} className="blue" /></div>
+                                        <span>Resume Analysis</span>
                                     </div>
                                 </td>
-                                <td>Uploaded Resume</td>
-                                <td>Backend Engineer</td>
+                                <td>Cloud Engineer</td>
+                                <td><span className="ai-badge ai-badge-info">Gaps identified</span></td>
                                 <td>15 mins ago</td>
                             </tr>
                             <tr>
                                 <td>
                                     <div className="student-info">
-                                        <div className="avatar sm">CH</div>
-                                        <span>Charlie Hill</span>
+                                        <div className="avatar sm bg-orange-light"><Zap size={14} className="orange" /></div>
+                                        <span>Career Recommendation</span>
                                     </div>
                                 </td>
-                                <td>Skill Assessment</td>
-                                <td>UX Designer</td>
+                                <td>AI Engineer</td>
+                                <td><span className="ai-badge ai-badge-warning">New match</span></td>
                                 <td>1 hour ago</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div className="student-info">
+                                        <div className="avatar sm bg-green-light"><Target size={14} className="green" /></div>
+                                        <span>Readiness Check</span>
+                                    </div>
+                                </td>
+                                <td>Product Manager</td>
+                                <td><span className="ai-badge ai-badge-success">Ready</span></td>
+                                <td>3 hours ago</td>
                             </tr>
                         </tbody>
                     </table>
