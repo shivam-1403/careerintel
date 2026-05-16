@@ -400,8 +400,8 @@
 .search-result-item .result-content--skill {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: flex-start;
+    gap: 10px;
     flex: 1;
     min-width: 0;
 }
@@ -409,29 +409,36 @@
 .search-result-item .result-text-stack {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    text-align: left;
     gap: 2px;
     min-width: 0;
-    flex: 1;
+    /* Let stack size to content so the badge sits neatly beside it */
 }
 
 .search-result-item .result-text-stack .result-name {
     min-width: 0;
+    width: 100%;
 }
 
 .search-skill-soon-badge {
     flex-shrink: 0;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 500;
     color: var(--muted-foreground);
-    opacity: 0.6;
-    background: transparent;
-    border: none;
-    padding: 0;
+    background: rgba(0, 0, 0, 0.05);
+    /* very subtle pill */
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+    /* Push badge to the right neatly and aligned */
 }
 
 .search-result-item:hover .search-skill-soon-badge,
 .search-result-item.selected .search-skill-soon-badge {
-    opacity: 0.85;
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--foreground);
 }
 
 .search-section {
@@ -455,15 +462,18 @@
 }
 
 .search-results {
-    padding: 0 8px 8px 8px;
+    padding: 4px 8px 8px 8px;
+    /* Tighter padding for balanced list */
 }
 
 .search-result-item {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 10px 12px;
-    border-radius: 8px;
+    /* Vertically aligns icon and result-content */
+    gap: 12px;
+    padding: 8px 12px;
+    /* slightly refined tight padding like modern SaaS */
+    border-radius: 6px;
     cursor: pointer;
     transition: background 0.15s ease;
 }
@@ -499,6 +509,9 @@
 .search-result-item .result-content {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    text-align: left;
     gap: 2px;
     min-width: 0;
     flex: 1;
