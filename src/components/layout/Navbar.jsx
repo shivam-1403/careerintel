@@ -344,20 +344,18 @@ const Navbar = ({ toggleSidebar }) => {
                                                     return (
                                                         <div
                                                             key={`skill-${skill.id}`}
-                                                            className={`search-result-item search-result-item--skill ${selectedIndex === globalIdx ? 'selected' : ''}`}
+                                                            className={`search-result-item ${selectedIndex === globalIdx ? 'selected' : ''}`}
                                                             onClick={() => handleResultClick({ ...skill, type: 'skill' })}
                                                             onMouseEnter={() => setSelectedIndex(globalIdx)}
                                                         >
                                                             <Code size={16} className="result-icon skill-icon" />
-                                                            <div className="result-content result-content--skill">
-                                                                <div className="result-text-stack">
-                                                                    <span className="result-name">{skill.name}</span>
-                                                                    <span className="result-category">{skill.category}</span>
-                                                                </div>
-                                                                <span className="search-skill-soon-badge" title="Skill pages are not available yet">
-                                                                    Coming soon
-                                                                </span>
+                                                            <div className="result-content">
+                                                                <span className="result-name">{skill.name}</span>
+                                                                <span className="result-category">{skill.category}</span>
                                                             </div>
+                                                            <span className="search-skill-soon-badge" title="Skill pages are not available yet">
+                                                                Coming soon
+                                                            </span>
                                                         </div>
                                                     );
                                                 })}
