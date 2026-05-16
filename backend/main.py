@@ -11,6 +11,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pydantic import BaseModel
+from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db, Base, engine
@@ -595,9 +596,8 @@ def _required_skills_payload(role_id: int, db: Session):
     return sorted(rows, key=lambda x: x["priority"], reverse=True)
 
 
-@app.get("/career/{role_id}")
 def get_current_user_optional(
-    credentials: HTTPAuthorizationCredentials = Depends(security_optional),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
     db: Session = Depends(get_db)
 ):
     """
@@ -623,6 +623,7 @@ def get_current_user_optional(
         print(f"Optional auth unexpected error: {str(ex)}")
         return None
 
+@app.get("/career/{role_id}")
 def get_career_details(
     role_id: int,
     db: Session = Depends(get_db),

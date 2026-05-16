@@ -11,7 +11,7 @@
   --border: #e2e8f0;
   --input: #f1f5f9;
   --ring: rgba(79, 70, 229, 0.2);
-  
+
   --success: #10b981;
   --warning: #f59e0b;
   --destructive: #ef4444;
@@ -38,7 +38,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   max-width: 100%;
   overflow-x: hidden;
 }
@@ -51,7 +52,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 700;
   color: var(--card-foreground);
   line-height: 1.2;
@@ -71,7 +77,9 @@ button {
   transition: var(--transition-fast);
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   font-family: inherit;
   font-size: 1rem;
   border-radius: var(--radius-md);
@@ -83,17 +91,22 @@ input, textarea, select {
   cursor: text;
 }
 
-input:hover, textarea:hover, select:hover {
+input:hover,
+textarea:hover,
+select:hover {
   border-color: var(--muted);
 }
 
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--ring);
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--muted-foreground);
 }
 
@@ -172,5 +185,6 @@ input::placeholder, textarea::placeholder {
 .gradient-text {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
