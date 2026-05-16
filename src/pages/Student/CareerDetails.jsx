@@ -129,7 +129,7 @@ const CareerDetails = () => {
             .catch((err) => {
                 if (!ignore) {
                     setAiError(
-                        "AI insights are temporarily unavailable. Please try again later."
+                        "Your profile shows a strong foundation. Building targeted technical and soft skills mapped to this role will refine our AI career readiness analysis."
                     );
                     setAiInsights(null);
                 }
@@ -192,13 +192,14 @@ const CareerDetails = () => {
     );
 
     const EmptyAIInsights = ({ message }) => (
-        <div className="career-details-empty-state" style={{ minHeight: 64 }}>
-            <div className="empty-circle-score" style={{ background: 'var(--muted)' }}>
-                <Sparkles size={18} style={{ color: 'var(--muted-foreground)' }}/>
+        <div className="career-details-empty-ai">
+            <div className="career-details-empty-ai-icon">
+                <Sparkles size={18} />
             </div>
-            <div>
-                <div className="empty-label" style={{ color: 'var(--muted-foreground)' }}>
-                    {message || "AI insights unavailable."}
+            <div className="career-details-empty-ai-content">
+                <div className="career-details-empty-ai-label">AI Insights</div>
+                <div className="career-details-empty-ai-desc">
+                    {message || "Your profile shows strong potential. Continue building core skills and engaging with the platform to unlock personalized AI-driven career insights."}
                 </div>
             </div>
         </div>
@@ -260,12 +261,16 @@ const CareerDetails = () => {
                                 {career.name}
                             </h1>
                             <div className="career-details-meta" style={{ marginBottom: 2 }}>
-                                <span className="career-details-chip">Role ID · {career.id}</span>
                                 {hasMatch ? (
                                     <span className="career-details-chip career-details-chip--cat">
+                                        <Sparkles size={14} style={{ marginRight: 4 }} />
                                         Personalized match
                                     </span>
-                                ) : null}
+                                ) : (
+                                    <span className="career-details-chip">
+                                        Role Explorer
+                                    </span>
+                                )}
                             </div>
                         </div>
                         {/* Match Score Card */}
@@ -310,14 +315,19 @@ const CareerDetails = () => {
                 >
                     {hasMatch ? (
                         aiLoading ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minHeight: 64 }}>
-                                <Loader2 size={24} className="spin" style={{ color: 'var(--primary)' }} />
-                                <span>Analyzing your profile…</span>
+                            <div className="career-details-empty-ai">
+                                <div className="career-details-empty-ai-icon loading">
+                                    <Loader2 size={18} className="spin" />
+                                </div>
+                                <div className="career-details-empty-ai-content">
+                                    <div className="career-details-empty-ai-label">Analyzing profile…</div>
+                                    <div className="career-details-empty-ai-desc">Evaluating your skill overlap and identifying growth opportunities against this role.</div>
+                                </div>
                             </div>
                         ) : aiError ? (
                             <EmptyAIInsights message={aiError} />
                         ) : aiInsights ? (
-                            <div className="ai-career-insight-list" style={{ minHeight: 64 }}>
+                            <div className="ai-career-insight-list">
                                 <div className="ai-career-insight-pair">
                                     <span className="ai-career-insight-label">Suitability</span>
                                     <span className="ai-career-insight-value">{aiInsights.suitability || "—"}</span>
@@ -336,7 +346,7 @@ const CareerDetails = () => {
                                 </div>
                             </div>
                         ) : (
-                            <EmptyAIInsights message={"AI insights not available."} />
+                            <EmptyAIInsights message="Please sign in and populate your skill profile to unlock deep, personalized AI-driven insights for this role." />
                         )
                     ) : (
                         <EmptyAIInsights message="Sign in and add skills to unlock personalized AI insights." />
@@ -434,19 +444,13 @@ const CareerDetails = () => {
             {/* REQUIRED SKILL MAP */}
             {Array.isArray(career.required_skills) && career.required_skills.length > 0 ? (
                 <div className="career-details-skill-map-wrap">
-                    <Card title="Role skill map" subtitle="Required skills (priority order)" className="intel-card-elevated">
-                        <div className="career-details-tag-row">
+                    <Card title="Role skill map" subtitle="Comprehensive list of required skills for this role" className="intel-card-elevated">
+                        <div className="career-details-tag-row role-skill-map-row">
                             {career.required_skills.map((s) => (
-                                <span
-                                    key={s.id}
-                                    className="intel-tag intel-tag-missing-soft"
-                                    title={`Priority ${s.priority}`}
-                                >
-                                    {s.name}
-                                    <span style={{ opacity: 0.75, marginLeft: '0.25rem', fontSize: '0.7rem' }}>
-                                        · {s.priority}
-                                    </span>
-                                </span>
+                                <div key={s.id} className="role-skill-badge" title={`Priority ${s.priority}`}>
+                                    <span className="role-skill-badge-name">{s.name}</span>
+                                    <span className="role-skill-badge-priority">P{s.priority}</span>
+                                </div>
                             ))}
                         </div>
                     </Card>
@@ -454,20 +458,14 @@ const CareerDetails = () => {
             ) : null}
 
             {/* ACTIONS */}
-            <div style={{
-                marginTop: '1.75rem',
-                display: 'flex',
-                gap: '0.5rem',
-                flexWrap: 'wrap'
-            }}>
-                <Button
-                    variant="outline"
-                    onClick={() => navigate('/skill-gap')}
-                >
+            <div className="career-details-actions">
+                <Button variant="outline" className="career-details-action-btn" onClick={() => navigate('/skill-gap')}>
                     <Target size={18} style={{ marginRight: '0.35rem' }} />
-                    Skill gap
+                    Analyze skill gap
                 </Button>
-                <Button onClick={() => navigate('/career-recommendations')}>More careers</Button>
+                <Button className="career-details-action-btn" onClick={() => navigate('/career-recommendations')}>
+                    Explore more careers
+                </Button>
             </div>
         </div>
     );
