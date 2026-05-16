@@ -398,24 +398,22 @@
 }
 
 .search-result-item .result-content--skill {
+    display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
+    justify-content: space-between;
+    width: 100%;
+    gap: 16px;
 }
 
 .search-result-item .result-text-stack {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     justify-content: center;
-    text-align: left;
+    align-items: flex-start;
     gap: 2px;
-    min-width: 0;
-    margin-top: 2px;
-    /* move text down slightly */
+    flex: 1;
+    margin-top: 4px;
 }
 
 .search-result-item .result-text-stack .result-name {
@@ -425,17 +423,14 @@
 
 .search-skill-soon-badge {
     flex-shrink: 0;
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     font-weight: 500;
     color: var(--muted-foreground);
-    background: rgba(0, 0, 0, 0.05);
-    /* very subtle pill */
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: auto;
-    /* Push badge to the right neatly and aligned */
-    transform: translateY(-2px);
-    /* shift badge up slightly */
+    background: rgba(0, 0, 0, 0.045);
+    padding: 4px 8px;
+    border-radius: 6px;
+    align-self: center;
+    margin-top: -6px;
 }
 
 .search-result-item:hover .search-skill-soon-badge,
