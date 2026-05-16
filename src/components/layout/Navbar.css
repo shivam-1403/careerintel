@@ -414,7 +414,8 @@
     text-align: left;
     gap: 2px;
     min-width: 0;
-    /* Let stack size to content so the badge sits neatly beside it */
+    margin-top: 2px;
+    /* move text down slightly */
 }
 
 .search-result-item .result-text-stack .result-name {
@@ -433,6 +434,8 @@
     border-radius: 4px;
     margin-left: auto;
     /* Push badge to the right neatly and aligned */
+    transform: translateY(-2px);
+    /* shift badge up slightly */
 }
 
 .search-result-item:hover .search-skill-soon-badge,
