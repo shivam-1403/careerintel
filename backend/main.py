@@ -166,166 +166,120 @@ def signup(data: SignupRequest, db: Session = Depends(get_db)):
     }
 
 
+import requests
+
 # ============================
-# OTP FORGOT PASSWORD SYSTEM
+# JWT FORGOT PASSWORD SYSTEM
 # ============================
 
-# OTP Storage: {email: {"code": "123456", "expires_at": datetime}}
-otp_storage = {}
-OTP_EXPIRE_MINUTES = 10
+RESET_TOKEN_EXPIRE_MINUTES = 15
 
-# Email configuration (replace with your actual SMTP settings)
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-SMTP_USERNAME = "your_email@gmail.com"
-SMTP_PASSWORD = "your_app_password"
+def create_reset_token(email: str):
+    """Generate a JWT specifically for password reset"""
+    expire = datetime.utcnow() + timedelta(minutes=RESET_TOKEN_EXPIRE_MINUTES)
+    to_encode = {"sub": email, "type": "password_reset", "exp": expire}
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-
-def generate_otp():
-    """Generate a 6-digit OTP"""
-    return ''.join(random.choices('0123456789', k=6))
-
-
-def send_email(to_email: str, subject: str, body: str):
-    """Send email using SMTP (simple placeholder)"""
+def send_reset_email(email: str, token: str):
+    """Send reset link via Resend API organically using requests"""
+    RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+    FRONTEND_URL = os.getenv("FRONTEND_URL")
+    if not FRONTEND_URL:
+        print("Warning: FRONTEND_URL not configured")
+        return False
+    
+    reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+    
+    # Generic console log fallback for development if Resend is not configured
+    print(f"🔒 PASS RESET LINK: {reset_link}")
+    
+    if not RESEND_API_KEY:
+        print("Warning: RESEND_API_KEY not set. Check console for reset link.")
+        return False
+        
     try:
-        msg = MIMEMultipart()
-        msg['From'] = SMTP_USERNAME
-        msg['To'] = to_email
-        msg['Subject'] = subject
-
-        msg.attach(MIMEText(body, 'html'))
-
-        # For demo purposes, we'll just log the email
-        # In production, uncomment the SMTP code below
-        print(f"📧 EMAIL SENT to {to_email}")
-        print(f"   Subject: {subject}")
-        print(f"   Body: {body}")
-
-        # Uncomment for production:
-        # server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        # server.starttls()
-        # server.login(SMTP_USERNAME, SMTP_PASSWORD)
-        # server.send_message(msg)
-        # server.quit()
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "from": "CareerIntel <onboarding@resend.dev>", 
+                "to": [email],
+                "subject": "Reset your CareerIntel password",
+                "html": f"""
+                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; background-color: #f9fbfd; border: 1px solid #eaeaea; border-radius: 8px;">
+                    <h2 style="color: #4f46e5; margin-top: 0;">CareerIntel</h2>
+                    <p style="color: #333; line-height: 1.5;">You requested a password reset. Click the button below to securely reset your password.</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{reset_link}" style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Reset Password</a>
+                    </div>
+                    <p style="color: #666; font-size: 13px; line-height: 1.4;">This link will expire in {RESET_TOKEN_EXPIRE_MINUTES} minutes.</p>
+                    <p style="color: #666; font-size: 13px; line-height: 1.4;">If you did not request this password change, you can safely ignore this email.</p>
+                </div>
+                """
+            }
+        )
+        if response.status_code not in [200, 201]:
+            print("Resend error:", response.text)
+            return False
 
         return True
+    
     except Exception as e:
-        print(f"Error sending email: {e}")
+        print(f"Failed to send email: {e}")
         return False
 
-
-def send_otp_email(email: str, otp: str):
-    """Send OTP via email"""
-    subject = "CareerIntel - Password Reset Code"
-    body = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; padding: 20px;">
-        <div style="max-width: 500px; margin: 0 auto; background: #f8f9fa; padding: 30px; border-radius: 10px;">
-            <h2 style="color: #4f46e5;">CareerIntel</h2>
-            <p>You requested a password reset. Use the verification code below:</p>
-            <div style="background: #4f46e5; color: white; padding: 15px 30px; font-size: 28px; font-weight: bold; letter-spacing: 5px; border-radius: 8px; display: inline-block; margin: 20px 0;">
-                {otp}
-            </div>
-            <p style="color: #666; font-size: 14px;">This code will expire in {OTP_EXPIRE_MINUTES} minutes.</p>
-            <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
-        </div>
-    </body>
-    </html>
-    """
-    return send_email(email, subject, body)
-
-
-# Request password reset - send OTP
-class SendResetCodeRequest(BaseModel):
+class ForgotPasswordRequest(BaseModel):
     email: str
 
-
-@app.post("/auth/send-reset-code")
-def send_reset_code(data: SendResetCodeRequest, db: Session = Depends(get_db)):
-    # Check if user exists
+@app.post("/auth/forgot-password")
+def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
-    if not user:
-        # Don't reveal if email exists or not (security)
-        return {"message": "If the email exists, a reset code will be sent"}
+    
+    # We silently succeed even if the user does not exist to prevent user enumeration
+    if user:
+        token = create_reset_token(user.email)
+        send_reset_email(user.email, token)
+        
+    return {"message": "If the email exists, a password reset link will be sent."}
 
-    # Generate OTP
-    otp = generate_otp()
-    expires_at = datetime.utcnow() + timedelta(minutes=OTP_EXPIRE_MINUTES)
-
-    # Store OTP
-    otp_storage[data.email] = {
-        "code": otp,
-        "expires_at": expires_at,
-        "verified": False
-    }
-
-    # Send email
-    send_otp_email(data.email, otp)
-
-    return {"message": "If the email exists, a reset code will be sent"}
-
-
-# Verify OTP
-class VerifyResetCodeRequest(BaseModel):
-    email: str
-    code: str
-
-
-@app.post("/auth/verify-reset-code")
-def verify_reset_code(data: VerifyResetCodeRequest):
-    stored_otp = otp_storage.get(data.email)
-
-    if not stored_otp:
-        raise HTTPException(status_code=400, detail="No reset code found. Please request a new code.")
-
-    # Check expiry
-    if datetime.utcnow() > stored_otp["expires_at"]:
-        del otp_storage[data.email]
-        raise HTTPException(status_code=400, detail="Reset code expired. Please request a new code.")
-
-    # Verify code
-    if stored_otp["code"] != data.code:
-        raise HTTPException(status_code=400, detail="Invalid reset code.")
-
-    # Mark as verified (allows password reset)
-    stored_otp["verified"] = True
-
-    return {"message": "Code verified successfully. You can now reset your password."}
-
-
-# Reset password
 class ResetPasswordRequest(BaseModel):
-    email: str
+    token: str
     new_password: str
-
 
 @app.post("/auth/reset-password")
 def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
-    stored_otp = otp_storage.get(data.email)
-
-    # Check if OTP was verified
-    if not stored_otp or not stored_otp.get("verified"):
-        raise HTTPException(status_code=400, detail="Please verify your identity first.")
-
-    # Check expiry
-    if datetime.utcnow() > stored_otp["expires_at"]:
-        del otp_storage[data.email]
-        raise HTTPException(status_code=400, detail="Reset code expired. Please request a new code.")
-
-    # Find user and update password
-    user = db.query(User).filter(User.email == data.email).first()
+    try:
+        payload = jwt.decode(data.token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        # Verify custom claim to prevent using normal access tokens for pass reset
+        if payload.get("type") != "password_reset":
+            raise HTTPException(status_code=400, detail="Invalid token type.")
+            
+        email = payload.get("sub")
+        if not email:
+            raise HTTPException(status_code=400, detail="Invalid token payload.")
+            
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link. Please request a new one.")
+        
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
-
-    # Update password
+    
+    if len(data.new_password) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 8 characters long."
+        ) 
+        
     user.password = hash_password(data.new_password)
     db.commit()
+    
+    return {"message": "Password reset successfully. You may now login."}
 
-    # Clear OTP
-    del otp_storage[data.email]
-
-    return {"message": "Password reset successfully. Please login with your new password."}
 
 
 def get_current_user(
