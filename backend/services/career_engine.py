@@ -25,21 +25,21 @@ def compare_skills_with_roles(user_skills, db):
     """
     user_skills = list of Skill objects
     """
-
     results = []
-
     user_skill_ids = {skill.id for skill in user_skills}
 
+    # Bulk fetch ALL roles, role-mappings, and skills
     roles = db.query(Role).all()
+    all_role_skills = db.query(RoleSkill).all()
+    all_skills = {s.id: s for s in db.query(Skill).all()}
+
+    # Group mappings in memory (O(N))
+    role_skill_map = {}
+    for rs in all_role_skills:
+        role_skill_map.setdefault(rs.role_id, []).append(rs)
 
     for role in roles:
-
-        role_mappings = (
-            db.query(RoleSkill)
-            .filter(RoleSkill.role_id == role.id)
-            .all()
-        )
-
+        role_mappings = role_skill_map.get(role.id, [])
         if not role_mappings:
             continue
 
@@ -50,7 +50,9 @@ def compare_skills_with_roles(user_skills, db):
         missing_skills = []
 
         for rs in role_mappings:
-            skill = db.query(Skill).filter(Skill.id == rs.skill_id).first()
+            skill = all_skills.get(rs.skill_id)
+            if not skill:
+                continue
 
             if rs.skill_id in user_skill_ids:
                 matched_weight += rs.importance_weight
@@ -58,7 +60,7 @@ def compare_skills_with_roles(user_skills, db):
             else:
                 missing_skills.append(skill.name)
 
-        score = int((matched_weight / total_weight) * 100)
+        score = int((matched_weight / total_weight) * 100) if total_weight > 0 else 0
 
         results.append({
             "role_id": role.id,
@@ -113,6 +115,11 @@ def get_skill_gap_for_role(user_id, role_id, db):
     if not role_mappings:
         return None
 
+    # Bulk fetch required skills to avoid N+1 query loops
+    skill_ids_to_fetch = [rs.skill_id for rs in role_mappings]
+    skills = db.query(Skill).filter(Skill.id.in_(skill_ids_to_fetch)).all()
+    skill_map = {s.id: s for s in skills}
+
     total_weight = sum(rs.importance_weight for rs in role_mappings)
 
     matched_weight = 0
@@ -121,7 +128,9 @@ def get_skill_gap_for_role(user_id, role_id, db):
     soft_gaps = []
 
     for rs in role_mappings:
-        skill = db.query(Skill).filter(Skill.id == rs.skill_id).first()
+        skill = skill_map.get(rs.skill_id)
+        if not skill:
+            continue
 
         if rs.skill_id in user_skill_ids:
             matched_weight += rs.importance_weight
@@ -141,7 +150,7 @@ def get_skill_gap_for_role(user_id, role_id, db):
                     "status": "Missing"
                 })
 
-    score = int((matched_weight / total_weight) * 100)
+    score = int((matched_weight / total_weight) * 100) if total_weight > 0 else 0
 
     # Sort gaps by priority
     technical_gaps = sorted(technical_gaps, key=lambda x: x["priority"], reverse=True)
