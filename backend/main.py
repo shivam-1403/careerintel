@@ -646,7 +646,17 @@ def get_career_details(
     response["empty_states"]["no_matched_skills"] = len(gap["matched_skills"]) == 0
     response["empty_states"]["no_missing_skills"] = len(missing_names) == 0
 
-    return response
+    if user:
+        ai_insight = generate_ai_insight(
+            role.name,
+            response["matched_skills"],
+            response["missing_skills"],
+            score
+        )
+
+        response["ai_insight"] = ai_insight
+    else:
+        response["ai_insight"] = None
 
 
 class RoadmapRequest(BaseModel):
