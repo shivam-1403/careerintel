@@ -657,6 +657,7 @@ def get_career_details(
         response["ai_insight"] = ai_insight
     else:
         response["ai_insight"] = None
+    return response
 
 
 class RoadmapRequest(BaseModel):
