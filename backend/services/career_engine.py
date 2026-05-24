@@ -33,7 +33,7 @@ def compare_skills_with_roles(user_skills, db):
     all_role_skills = db.query(RoleSkill).all()
     all_skills = {s.id: s for s in db.query(Skill).all()}
 
-    # Group mappings in memory (O(N))
+    # Group mappings in memory
     role_skill_map = {}
     for rs in all_role_skills:
         role_skill_map.setdefault(rs.role_id, []).append(rs)

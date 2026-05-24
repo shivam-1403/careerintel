@@ -1,6 +1,4 @@
 import re
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 
 # -------------------- STOPWORDS --------------------
@@ -29,7 +27,7 @@ def clean_text(text):
     return re.sub(r'\s+', ' ', text.lower())
 
 
-# -------------------- KEYWORD EXTRACTION (NO SPACY) --------------------
+# -------------------- KEYWORD EXTRACTION --------------------
 def extract_keywords(text):
     text = text.lower()
 

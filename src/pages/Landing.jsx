@@ -163,7 +163,7 @@ const Landing = () => {
                     </div>
                 </div>
                 <div className="footer-bottom">
-                    <p>&copy; 2024 AI Career Intelligence Platform. All rights reserved.</p>
+                    <p>&copy; 2026 AI Career Intelligence Platform. All rights reserved.</p>
                 </div>
             </footer>
         </div>

@@ -1,41 +1,7 @@
 from database import SessionLocal
-from models import RoleSkill, Skill, Role
+from models import RoleSkill
 
 db = SessionLocal()
-
-# First, add any missing skills
-additional_skills = [
-    ("HTML", "technical"),
-    ("CSS", "technical"),
-    ("Express", "technical"),
-    ("APIs", "technical"),
-    ("Databases", "technical"),
-]
-
-for name, category in additional_skills:
-    normalized = name.lower().strip()
-    existing = db.query(Skill).filter_by(normalized_name=normalized).first()
-    if not existing:
-        skill = Skill(
-            name=name,
-            normalized_name=normalized,
-            category=category
-        )
-        db.add(skill)
-        db.flush()  # Get the ID
-        print(f"✅ Added skill: {name}")
-    else:
-        print(f"Skill already exists: {name}")
-
-db.commit()
-
-# Now create role_skill_data with proper skill IDs based on normalized_name
-def get_skill_id(normalized_name):
-    skill = db.query(Skill).filter_by(normalized_name=normalized_name).first()
-    if skill:
-        return skill.id
-    print(f"WARNING: Skill not found: {normalized_name}")
-    return None
 
 role_skill_data = [
 
@@ -1866,8 +1832,6 @@ role_skill_data = [
 
 # Clear existing mappings and re-add (to ensure correct weights)
 for role_id, skill_id, weight in role_skill_data:
-    if skill_id is None:
-        continue
 
     # Delete existing mapping for this role/skill combo
     existing = db.query(RoleSkill).filter_by(

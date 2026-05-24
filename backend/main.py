@@ -1,15 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.staticfiles import StaticFiles
-import shutil
 import pdfplumber
 from groq import Groq
 import os
-import random
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
@@ -18,16 +12,14 @@ from database import get_db, Base, engine
 from models import User, Skill, UserSkill, Role, RoleSkill, ResumeScan, UserRoadmap, Base
 from auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 from jose import JWTError, jwt
-from services.career_engine import extract_skills_from_text, compare_skills_with_roles, recommend_roles_for_user, get_skill_gap_for_role
+from services.career_engine import extract_skills_from_text, recommend_roles_for_user, get_skill_gap_for_role
 from services.ats_engine import calculate_resume_quality
-import time
 from datetime import datetime, timedelta
+import requests
 
 
 app = FastAPI()
 security = HTTPBearer()
-# Add optional security dependency for optional auth
-security_optional = HTTPBearer(auto_error=False)
 
 app.add_middleware(
     CORSMiddleware,
@@ -165,8 +157,6 @@ def signup(data: SignupRequest, db: Session = Depends(get_db)):
         }
     }
 
-
-import requests
 
 # ============================
 # JWT FORGOT PASSWORD SYSTEM
@@ -437,12 +427,7 @@ async def upload_resume(file: UploadFile = File(...)):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(400, "Only PDF allowed")
 
-    text = ""
-
-    file.file.seek(0)
-    with pdfplumber.open(file.file) as pdf:
-        for page in pdf.pages:
-            text += (page.extract_text() or "") + "\n"
+    text = extract_text_from_pdf(file)
 
     return {
         "filename": file.filename,
