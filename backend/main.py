@@ -516,6 +516,25 @@ def get_career_gap(
     if not result:
         raise HTTPException(status_code=404, detail="Role not found")
 
+    matched = result.get("matched_skills", [])
+
+    missing = [
+        skill["name"]
+        for skill in (
+            result.get("technical_gaps", []) +
+            result.get("soft_skill_gaps", [])
+        )
+    ]
+
+    ai_insight = generate_ai_insight(
+        result["career"],
+        matched,
+        missing,
+        result["score"]
+    )
+
+    result["ai_insight"] = ai_insight
+
     return result
 
 
