@@ -5,14 +5,17 @@ from models import UserSkill, Role, RoleSkill, Skill
 # SKILL EXTRACTION FROM TEXT
 # ===============================
 def extract_skills_from_text(text, db):
-    words = set(re.findall(r"[a-zA-Z\+\#]+", text.lower()))
-
+    text_lower = text.lower()
     db_skills = db.query(Skill).all()
 
     matched = []
 
     for skill in db_skills:
-        if skill.normalized_name in words:
+        # Create a regex pattern to match the skill as a discrete word/phrase
+        # Negative lookbehinds/lookaheads ensure we don't match partial words or partial special-character combinations (e.g., matching "C" inside "C++")
+        pattern = r"(?<![a-z0-9\+\#])" + re.escape(skill.normalized_name) + r"(?![a-z0-9\+\#])"
+        
+        if re.search(pattern, text_lower):
             matched.append(skill)
 
     return matched  # return Skill objects
