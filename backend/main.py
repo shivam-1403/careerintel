@@ -15,8 +15,10 @@ from jose import JWTError, jwt
 from services.career_engine import extract_skills_from_text, recommend_roles_for_user, get_skill_gap_for_role
 from services.ats_engine import calculate_resume_quality
 from datetime import datetime, timedelta
-import smtplib
 from email.message import EmailMessage
+import base64
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 
 
 app = FastAPI()
@@ -237,17 +239,22 @@ def create_reset_token(email: str):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def send_reset_email(email: str, token: str):
-    """Send password reset email via Gmail SMTP."""
+    """Send password reset email through Gmail API over HTTPS."""
+    
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+    GOOGLE_REFRESH_TOKEN = os.getenv("GOOGLE_REFRESH_TOKEN")
     SMTP_EMAIL = os.getenv("SMTP_EMAIL")
-    SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD")
     FRONTEND_URL = os.getenv("FRONTEND_URL")
 
-    if not SMTP_EMAIL or not SMTP_APP_PASSWORD:
-        print("Warning: SMTP email credentials are not configured.")
-        return False
-
-    if not FRONTEND_URL:
-        print("Warning: FRONTEND_URL not configured.")
+    if not all([
+        GOOGLE_CLIENT_ID,
+        GOOGLE_CLIENT_SECRET,
+        GOOGLE_REFRESH_TOKEN,
+        SMTP_EMAIL,
+        FRONTEND_URL
+    ]):
+        print("Warning: Gmail API credentials are not fully configured.")
         return False
 
     reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
@@ -302,17 +309,31 @@ CareerIntel
     )
 
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
-            server.set_debuglevel(1)
-            server.starttls()
-            server.login(SMTP_EMAIL, SMTP_APP_PASSWORD)
-            server.send_message(msg)
+        credentials = Credentials(
+            token=None,
+            refresh_token=GOOGLE_REFRESH_TOKEN,
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=GOOGLE_CLIENT_ID,
+            client_secret=GOOGLE_CLIENT_SECRET,
+            scopes=["https://www.googleapis.com/auth/gmail.send"]
+        )
+
+        service = build("gmail", "v1", credentials=credentials)
+
+        encoded_message = base64.urlsafe_b64encode(
+            msg.as_bytes()
+        ).decode()
+
+        service.users().messages().send(
+            userId="me",
+            body={"raw": encoded_message}
+        ).execute()
 
         print(f"Password reset email sent to {email}")
         return True
 
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email through Gmail API: {e}")
         return False
 
 class ForgotPasswordRequest(BaseModel):

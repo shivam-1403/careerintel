@@ -41,4 +41,6 @@ Thumbs.db
 
 uploads/
 
+credentials.json
+get_gmail_token.py
 TECHNICAL_DOCUMENTATION.md
