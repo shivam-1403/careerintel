@@ -15,7 +15,8 @@ from jose import JWTError, jwt
 from services.career_engine import extract_skills_from_text, recommend_roles_for_user, get_skill_gap_for_role
 from services.ats_engine import calculate_resume_quality
 from datetime import datetime, timedelta
-import requests
+import smtplib
+from email.message import EmailMessage
 
 
 app = FastAPI()
@@ -236,52 +237,79 @@ def create_reset_token(email: str):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def send_reset_email(email: str, token: str):
-    """Send reset link via Resend API organically using requests"""
-    RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+    """Send password reset email via Gmail SMTP."""
+    SMTP_EMAIL = os.getenv("SMTP_EMAIL")
+    SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD")
     FRONTEND_URL = os.getenv("FRONTEND_URL")
-    if not FRONTEND_URL:
-        print("Warning: FRONTEND_URL not configured")
-        return False
-    
-    reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
-    
-    # Generic console log fallback for development if Resend is not configured
-    print(f"🔒 PASS RESET LINK: {reset_link}")
-    
-    if not RESEND_API_KEY:
-        print("Warning: RESEND_API_KEY not set. Check console for reset link.")
-        return False
-        
-    try:
-        response = requests.post(
-            "https://api.resend.com/emails",
-            headers={
-                "Authorization": f"Bearer {RESEND_API_KEY}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "from": "CareerIntel <onboarding@resend.dev>", 
-                "to": [email],
-                "subject": "Reset your CareerIntel password",
-                "html": f"""
-                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; background-color: #f9fbfd; border: 1px solid #eaeaea; border-radius: 8px;">
-                    <h2 style="color: #4f46e5; margin-top: 0;">CareerIntel</h2>
-                    <p style="color: #333; line-height: 1.5;">You requested a password reset. Click the button below to securely reset your password.</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="{reset_link}" style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Reset Password</a>
-                    </div>
-                    <p style="color: #666; font-size: 13px; line-height: 1.4;">This link will expire in {RESET_TOKEN_EXPIRE_MINUTES} minutes.</p>
-                    <p style="color: #666; font-size: 13px; line-height: 1.4;">If you did not request this password change, you can safely ignore this email.</p>
-                </div>
-                """
-            }
-        )
-        if response.status_code not in [200, 201]:
-            print("Resend error:", response.text)
-            return False
 
+    if not SMTP_EMAIL or not SMTP_APP_PASSWORD:
+        print("Warning: SMTP email credentials are not configured.")
+        return False
+
+    if not FRONTEND_URL:
+        print("Warning: FRONTEND_URL not configured.")
+        return False
+
+    reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+
+    msg = EmailMessage()
+    msg["Subject"] = "Reset your CareerIntel password"
+    msg["From"] = f"CareerIntel <{SMTP_EMAIL}>"
+    msg["To"] = email
+
+    msg.set_content(
+        f"""
+You requested a password reset for your CareerIntel account.
+
+Click the link below to reset your password:
+
+{reset_link}
+
+This link will expire in {RESET_TOKEN_EXPIRE_MINUTES} minutes.
+
+If you did not request this password change, you can safely ignore this email.
+
+CareerIntel
+"""
+    )
+
+    msg.add_alternative(
+        f"""
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; background-color: #f9fbfd; border: 1px solid #eaeaea; border-radius: 8px;">
+            <h2 style="color: #4f46e5; margin-top: 0;">CareerIntel</h2>
+
+            <p style="color: #333; line-height: 1.5;">
+                You requested a password reset. Click the button below to securely reset your password.
+            </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{reset_link}"
+                   style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                    Reset Password
+                </a>
+            </div>
+
+            <p style="color: #666; font-size: 13px; line-height: 1.4;">
+                This link will expire in {RESET_TOKEN_EXPIRE_MINUTES} minutes.
+            </p>
+
+            <p style="color: #666; font-size: 13px; line-height: 1.4;">
+                If you did not request this password change, you can safely ignore this email.
+            </p>
+        </div>
+        """,
+        subtype="html"
+    )
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(SMTP_EMAIL, SMTP_APP_PASSWORD)
+            server.send_message(msg)
+
+        print(f"Password reset email sent to {email}")
         return True
-    
+
     except Exception as e:
         print(f"Failed to send email: {e}")
         return False
