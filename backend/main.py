@@ -302,7 +302,8 @@ CareerIntel
     )
 
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
+            server.set_debuglevel(1)
             server.starttls()
             server.login(SMTP_EMAIL, SMTP_APP_PASSWORD)
             server.send_message(msg)
