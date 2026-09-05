@@ -191,25 +191,28 @@
 
 .skill-dropdown {
     position: absolute;
-    top: 100%; /* BELOW input */
+    top: 100%;
     left: 0;
     right: 0;
-    border: 1px solid #ddd;
-    background: white;
+    border: 1px solid var(--border);
+    background: var(--card);
     max-height: 180px;
     overflow-y: auto;
     z-index: 1000;
     border-radius: 6px;
     margin-top: 4px;
+    box-shadow: var(--shadow-md);
 }
 
 .skill-option {
     padding: 8px 12px;
     cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--foreground);
 }
 
 .skill-option:hover {
-    background: #f3f4f6;
+    background: var(--input);
 }
 
 .tag-add-row {
@@ -266,17 +269,17 @@
 
 /* Inline validation error styles */
 .input-error {
-    border-color: #ef4444 !important;
-    background-color: #fef2f2 !important;
+    border-color: var(--destructive) !important;
+    background-color: rgba(239, 68, 68, 0.05) !important;
 }
 
 .input-error:focus {
-    border-color: #ef4444 !important;
+    border-color: var(--destructive) !important;
     box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
 }
 
 .error-text {
-    color: #ef4444;
+    color: var(--destructive);
     font-size: 0.75rem;
     margin-top: 0.25rem;
     display: block;

@@ -1,9 +1,10 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, FileText, RefreshCcw, Sparkles } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
 import './ResumeAnalyzer.css';
+import API_BASE from '../../config/api';
 
 const ResumeAnalyzer = () => {
     const toast = useToast();
@@ -19,12 +20,12 @@ const ResumeAnalyzer = () => {
                 const token = localStorage.getItem("token");
 
                 // Fetch roles
-                const rolesRes = await fetch("https://careerintel-w10f.onrender.com/roles");
+                const rolesRes = await fetch(`${API_BASE}/roles`);
                 const rolesData = await rolesRes.json();
                 setRoles(rolesData);
 
                 // Fetch user's target role
-                const profileRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
+                const profileRes = await fetch(`${API_BASE}/user/profile`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const profile = await profileRes.json();
@@ -59,7 +60,7 @@ const ResumeAnalyzer = () => {
 
         try {
             const res = await fetch(
-                `https://careerintel-w10f.onrender.com/resume/analyze/${selectedRole}`,
+                `${API_BASE}/resume/analyze/${selectedRole}`,
                 {
                     method: "POST",
                     headers: {
@@ -88,37 +89,36 @@ const ResumeAnalyzer = () => {
         setAnalysis(null);
     };
 
-    // ---- UI Styling Helpers ----
     // Section headings (bold)
     const sectionTitleStyle = {
         fontWeight: 700,
         fontSize: '1.05rem',
         marginBottom: 16,
-        color: '#18181b',
+        color: 'var(--card-foreground)',
         letterSpacing: '-0.01rem',
         lineHeight: 1.35
     };
 
-    // Body / descriptions (light)
+    // Body / descriptions
     const subTextStyle = {
         fontWeight: 400,
-        color: '#94a3b8',
+        color: 'var(--muted-foreground)',
         fontSize: '0.94rem',
         marginBottom: 14,
         marginTop: 2,
         lineHeight: 1.65
     };
 
-    // Form labels (normal)
+    // Form labels
     const formLabelStyle = {
-        fontWeight: 400,
+        fontWeight: 500,
         fontSize: 13,
-        color: '#64748b',
+        color: 'var(--muted-foreground)',
         marginBottom: 8,
         display: 'block'
     };
 
-    // 3. Card padding — clean dashboard spacing
+    // Card padding — clean dashboard spacing
     const cardPadding = {
         padding: '2rem 1.75rem 1.85rem 1.75rem'
     };
@@ -142,7 +142,6 @@ const ResumeAnalyzer = () => {
         boxSizing: 'border-box'
     };
 
-    // 6. Consistent tag gap
     const tagWrapperStyle = {
         display: 'flex',
         flexWrap: 'wrap',
@@ -159,31 +158,28 @@ const ResumeAnalyzer = () => {
         WARNING: 3
     };
 
-    // Map type keys for display and for colors
+    // Semantic, theme-adaptive insight colors
     const insightTypeColors = {
         POSITIVE: {
-            badgeBg: 'rgba(16,185,129,0.10)',
-            badgeColor: '#059669',
+            badgeBg: 'rgba(16, 185, 129, 0.15)',
+            badgeColor: '#10b981',
             border: '3px solid #10b981',
-            cardBg: 'rgba(16,216,129,0.08)',
-            cardTitle: '#059669',
-            cardShadow: '0 2px 14px 0 rgba(16,185,129,0.075)'
+            cardBg: 'rgba(16, 185, 129, 0.08)',
+            cardTitle: '#10b981',
         },
         IMPROVEMENT: {
-            badgeBg: 'rgba(234, 179, 8, 0.14)',
-            badgeColor: '#a16207',
-            border: '3px solid #eab308',
-            cardBg: 'rgba(254, 243, 199, 0.42)',
-            cardTitle: '#a16207',
-            cardShadow: '0 2px 14px 0 rgba(234,179,8,0.08)'
+            badgeBg: 'rgba(245, 158, 11, 0.15)',
+            badgeColor: '#f59e0b',
+            border: '3px solid #f59e0b',
+            cardBg: 'rgba(245, 158, 11, 0.08)',
+            cardTitle: '#f59e0b',
         },
         WARNING: {
-            badgeBg: 'rgba(239, 68, 68, 0.12)',
-            badgeColor: '#dc2626',
+            badgeBg: 'rgba(239, 68, 68, 0.15)',
+            badgeColor: '#ef4444',
             border: '3px solid #ef4444',
-            cardBg: 'rgba(254, 226, 226, 0.35)',
-            cardTitle: '#dc2626',
-            cardShadow: '0 2px 14px 0 rgba(239,68,68,0.07)'
+            cardBg: 'rgba(239, 68, 68, 0.08)',
+            cardTitle: '#ef4444',
         }
     };
 
@@ -193,14 +189,14 @@ const ResumeAnalyzer = () => {
         lineHeight: 1,
         textAlign: 'center',
         padding: '4px 9px',
-        fontWeight: 500,
+        fontWeight: 600,
         fontSize: '10.5px',
         textTransform: 'uppercase',
         borderRadius: 999,
         letterSpacing: '0.04em',
         marginRight: 8,
-        background: insightTypeColors[type]?.badgeBg || '#e0e7ef',
-        color: insightTypeColors[type]?.badgeColor || '#374151',
+        background: insightTypeColors[type]?.badgeBg || 'var(--input)',
+        color: insightTypeColors[type]?.badgeColor || 'var(--foreground)',
         border: 'none'
     });
 
@@ -214,13 +210,12 @@ const ResumeAnalyzer = () => {
         border: 'none',
         lineHeight: 1.35,
         fontSize: 12.5,
-        fontWeight: 500,
+        fontWeight: 600,
         margin: 0,
         textAlign: 'left',
         boxSizing: 'border-box'
     };
 
-    // Score row: circle left, text column right (side-by-side)
     const readinessSummaryRowStyle = {
         display: 'flex',
         alignItems: 'center',
@@ -228,7 +223,6 @@ const ResumeAnalyzer = () => {
         width: '100%'
     };
 
-    // Single text block: status + stats share one column, equal spacing
     const readinessTextColumnStyle = {
         display: 'flex',
         flexDirection: 'column',
@@ -246,7 +240,7 @@ const ResumeAnalyzer = () => {
     const readinessScoreLineStyle = {
         fontWeight: 400,
         fontSize: 13.25,
-        color: '#94a3b8',
+        color: 'var(--muted-foreground)',
         lineHeight: 1.45,
         margin: 0,
         padding: 0,
@@ -255,9 +249,8 @@ const ResumeAnalyzer = () => {
         boxSizing: 'border-box'
     };
 
-    // Main
     return (
-        <div className="resume-analyzer modern-dashboard" style={{ minHeight: '100vh', background: '#fcfcfd' }}>
+        <div className="resume-analyzer modern-dashboard" style={{ minHeight: '100vh' }}>
             {/* Header Section */}
             <div className="page-header dashboard-header" style={{ marginBottom: 32 }}>
                 <h1
@@ -267,7 +260,7 @@ const ResumeAnalyzer = () => {
                         fontSize: 26,
                         letterSpacing: '-0.02em',
                         marginBottom: 10,
-                        color: '#16192c',
+                        color: 'var(--foreground)',
                         textAlign: 'center'
                     }}
                 >
@@ -282,7 +275,7 @@ const ResumeAnalyzer = () => {
             <div className="analyzer-dashboard-grid" style={{ display: 'flex', gap: 28, alignItems: 'flex-start' }}>
                 {/* Left Panel */}
                 <div className="dashboard-left" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                    <Card className="dashboard-card upload-section" style={{ ...cardPadding, display: 'flex', flexDirection: 'column', height: '100%', borderRadius: 16, border: '1px solid #eef0f4' }}>
+                    <Card className="dashboard-card upload-section" style={{ ...cardPadding, display: 'flex', flexDirection: 'column', height: '100%', borderRadius: 16 }}>
                         {/* Target Career */}
                         <div style={{ ...sectionSpacing, marginBottom: 36 }}>
                             <div className="section-header" style={{ marginBottom: 8 }}>
@@ -305,10 +298,8 @@ const ResumeAnalyzer = () => {
                                         width: '100%',
                                         padding: '0.65rem 1rem',
                                         borderRadius: 8,
-                                        border: '1px solid #e2e8f0',
                                         fontSize: 14,
                                         outline: 'none',
-                                        background: '#fafafa'
                                     }}
                                 >
                                     <option value="">-- Select Career --</option>
@@ -338,9 +329,9 @@ const ResumeAnalyzer = () => {
                                                 marginTop: 0,
                                                 padding: '10px 12px',
                                                 borderRadius: 8,
-                                                background: '#f1f5f9',
-                                                border: '1px solid #e2e8f0',
-                                                color: '#475569',
+                                                background: 'var(--input)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--muted-foreground)',
                                                 fontSize: 13,
                                                 fontWeight: 400,
                                                 lineHeight: 1.5,
@@ -352,12 +343,12 @@ const ResumeAnalyzer = () => {
                                     )}
                                     <div className="upload-icon" style={{ marginBottom: 13 }}>
                                         {isUploading ? (
-                                            <RefreshCcw className="spinning" size={56} />
+                                            <RefreshCcw className="spinning" size={48} />
                                         ) : (
-                                            <Upload size={56} />
+                                            <Upload size={48} />
                                         )}
                                     </div>
-                                    <h3 className="upload-heading" style={{ fontWeight: 500, fontSize: 18, marginBottom: 15, letterSpacing: '-0.01em', color: '#334155', lineHeight: 1.35 }}>
+                                    <h3 className="upload-heading" style={{ fontWeight: 600, fontSize: 18, marginBottom: 12, letterSpacing: '-0.01em', color: 'var(--card-foreground)', lineHeight: 1.35 }}>
                                         {isUploading ? 'Analyzing Resume...' : 'Upload your Resume'}
                                     </h3>
                                     <input
@@ -379,7 +370,7 @@ const ResumeAnalyzer = () => {
                                     >
                                         Select PDF
                                     </Button>
-                                    <p className="upload-hint" style={{ color: '#94a3b8', fontSize: 13, fontWeight: 400, marginTop: 3, marginBottom: 0, letterSpacing: '0.01em', lineHeight: 1.5 }}>
+                                    <p className="upload-hint" style={{ color: 'var(--muted-foreground)', fontSize: 13, fontWeight: 400, marginTop: 3, marginBottom: 0, letterSpacing: '0.01em', lineHeight: 1.5 }}>
                                         PDF only • Max 5MB
                                     </p>
                                 </div>
@@ -387,7 +378,8 @@ const ResumeAnalyzer = () => {
                                 <div className="resume-preview completed-area"
                                     style={{
                                         padding: '1.2rem 1.32rem',
-                                        background: '#f9fafb',
+                                        background: 'var(--input)',
+                                        border: '1px solid var(--border)',
                                         borderRadius: 14,
                                         marginBottom: 0,
                                         display: 'flex',
@@ -396,12 +388,12 @@ const ResumeAnalyzer = () => {
                                     }}
                                 >
                                     <div className="file-info" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <FileText size={26} style={{ color: '#4f46e5' }} />
+                                        <FileText size={26} style={{ color: 'var(--primary)' }} />
                                         <div>
-                                            <h4 className="completed-title" style={{ fontWeight: 500, fontSize: 15, marginBottom: 4, color: '#334155', letterSpacing: '-0.01em' }}>
+                                            <h4 className="completed-title" style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, color: 'var(--card-foreground)', letterSpacing: '-0.01em' }}>
                                                 Analysis Complete
                                             </h4>
-                                            <span className="completed-sub" style={{ color: '#94a3b8', fontSize: 13, fontWeight: 400, lineHeight: 1.45 }}>Role-based analysis completed</span>
+                                            <span className="completed-sub" style={{ color: 'var(--muted-foreground)', fontSize: 13, fontWeight: 400, lineHeight: 1.45 }}>Role-based analysis completed</span>
                                         </div>
                                     </div>
                                     <Button
@@ -434,8 +426,9 @@ const ResumeAnalyzer = () => {
                                                     className="keyword-tag matched"
                                                     style={{
                                                         ...skillTagStyle,
-                                                        background: 'rgba(16,185,129,0.16)',
-                                                        color: '#059669'
+                                                        background: 'rgba(16, 185, 129, 0.15)',
+                                                        color: 'var(--success)',
+                                                        border: '1px solid rgba(16, 185, 129, 0.3)'
                                                     }}
                                                 >
                                                     {k}
@@ -457,8 +450,9 @@ const ResumeAnalyzer = () => {
                                                     className="keyword-tag missing"
                                                     style={{
                                                         ...skillTagStyle,
-                                                        background: 'rgba(251, 191, 36, 0.13)', // amber, not red
-                                                        color: '#f59e42'
+                                                        background: 'rgba(245, 158, 11, 0.15)',
+                                                        color: 'var(--warning)',
+                                                        border: '1px solid rgba(245, 158, 11, 0.3)'
                                                     }}
                                                 >
                                                     {k}
@@ -481,7 +475,7 @@ const ResumeAnalyzer = () => {
                                 fontSize: '1.02rem',
                                 marginBottom: 0,
                                 textAlign: 'left',
-                                color: '#0f172a'
+                                color: 'var(--card-foreground)'
                             }}>
                                 Career Readiness Analysis
                             </div>
@@ -490,10 +484,7 @@ const ResumeAnalyzer = () => {
                         style={{
                             ...analysisCardPadding,
                             minHeight: 560,
-                            background: '#fff',
-                            boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.06)',
-                            borderRadius: 16,
-                            border: '1px solid #eef0f4'
+                            borderRadius: 16
                         }}
                     >
                         {analysis ? (
@@ -528,13 +519,13 @@ const ResumeAnalyzer = () => {
                                                 <path
                                                     className="circle-bg"
                                                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                                    stroke="#eef2f6"
+                                                    stroke="var(--border)"
                                                     strokeWidth="2.8"
                                                     fill="none"
                                                 />
                                                 <path
                                                     className="circle"
-                                                    stroke="#6366f1"
+                                                    stroke="var(--primary)"
                                                     strokeWidth="2.8"
                                                     fill="none"
                                                     strokeLinecap="round"
@@ -555,9 +546,9 @@ const ResumeAnalyzer = () => {
                                             >
                                                 <span
                                                     style={{
-                                                        fontWeight: 600,
+                                                        fontWeight: 700,
                                                         fontSize: 14,
-                                                        color: '#334155',
+                                                        color: 'var(--card-foreground)',
                                                         letterSpacing: '-0.02em',
                                                         lineHeight: 1.15
                                                     }}
@@ -577,8 +568,8 @@ const ResumeAnalyzer = () => {
                                                     className="readiness-label readiness-status-strong"
                                                     style={{
                                                         ...readinessStatusPillBase,
-                                                        color: '#059669',
-                                                        background: 'rgba(16,185,129,0.14)'
+                                                        color: 'var(--success)',
+                                                        background: 'rgba(16, 185, 129, 0.15)'
                                                     }}
                                                 >
                                                     Strong Candidate
@@ -588,8 +579,8 @@ const ResumeAnalyzer = () => {
                                                     className="readiness-label readiness-status-moderate"
                                                     style={{
                                                         ...readinessStatusPillBase,
-                                                        color: '#a16207',
-                                                        background: 'rgba(234, 179, 8, 0.16)'
+                                                        color: 'var(--warning)',
+                                                        background: 'rgba(245, 158, 11, 0.15)'
                                                     }}
                                                 >
                                                     Moderate Readiness
@@ -599,8 +590,8 @@ const ResumeAnalyzer = () => {
                                                     className="readiness-label readiness-status-needs"
                                                     style={{
                                                         ...readinessStatusPillBase,
-                                                        color: '#a16207',
-                                                        background: 'rgba(234, 179, 8, 0.16)'
+                                                        color: 'var(--destructive)',
+                                                        background: 'rgba(239, 68, 68, 0.15)'
                                                     }}
                                                 >
                                                     Needs Improvement
@@ -608,13 +599,13 @@ const ResumeAnalyzer = () => {
                                             )}
                                             <div style={readinessScoreLineStyle}>
                                                 Skill Evidence:{' '}
-                                                <span style={{ color: '#6366f1', fontWeight: 500 }}>
+                                                <span style={{ color: 'var(--primary)', fontWeight: 600 }}>
                                                     {analysis.resume_skill_evidence_score}%
                                                 </span>
                                             </div>
                                             <div style={readinessScoreLineStyle}>
                                                 Resume Quality:{' '}
-                                                <span style={{ color: '#6366f1', fontWeight: 500 }}>
+                                                <span style={{ color: 'var(--primary)', fontWeight: 600 }}>
                                                     {analysis.resume_quality_score}%
                                                 </span>
                                             </div>
@@ -625,14 +616,14 @@ const ResumeAnalyzer = () => {
                                 {/* AI Insight */}
                                 {analysis.ai_insight && (
                                     <div className="ai-insight-card" style={{
-                                        background: '#f8fafc',
+                                        background: 'var(--input)',
                                         borderRadius: 10,
                                         padding: '1rem 1.1rem',
                                         marginBottom: 26,
                                         display: 'flex',
                                         flexDirection: 'column',
                                         gap: 8,
-                                        border: '1px solid #f1f5f9'
+                                        border: '1px solid var(--border)'
                                     }}>
                                         <div className="ai-insight-header"
                                             style={{
@@ -642,7 +633,7 @@ const ResumeAnalyzer = () => {
                                                 fontWeight: 600,
                                                 fontSize: 13.25,
                                                 marginBottom: 0,
-                                                color: '#6366f1'
+                                                color: 'var(--primary)'
                                             }}
                                         >
                                             <Sparkles size={17} strokeWidth={2} />
@@ -654,7 +645,7 @@ const ResumeAnalyzer = () => {
                                                 ...subTextStyle,
                                                 marginBottom: 0,
                                                 marginTop: 0,
-                                                color: '#94a3b8',
+                                                color: 'var(--muted-foreground)',
                                                 fontSize: 13.25,
                                                 lineHeight: 1.65,
                                                 maxWidth: '100%',
@@ -668,7 +659,7 @@ const ResumeAnalyzer = () => {
 
                                 {/* Insights */}
                                 <div className="insights-section" style={{ width: '100%' }}>
-                                    <h4 className="insights-header" style={{ ...sectionTitleStyle, marginBottom: 14, color: '#0f172a' }}>
+                                    <h4 className="insights-header" style={{ ...sectionTitleStyle, marginBottom: 14, color: 'var(--card-foreground)' }}>
                                         Analysis Insights
                                     </h4>
                                     {analysis.insights && analysis.insights.length > 0 ? (
@@ -682,11 +673,9 @@ const ResumeAnalyzer = () => {
                                                 width: '100%'
                                             }}
                                         >
-                                            {/* Sort Insight cards */}
                                             {analysis.insights
                                                 .slice()
                                                 .sort((a, b) => {
-                                                    // Lower number = higher priority
                                                     const getOrder = (type) =>
                                                         insightOrder[type?.toUpperCase()] ||
                                                         (type?.toUpperCase() === "IMPROVEMENT" ? 2 : 999);
@@ -700,13 +689,13 @@ const ResumeAnalyzer = () => {
                                                             key={index}
                                                             className={`insight-card insight-${typ.toLowerCase()}`}
                                                             style={{
-                                                                background: colorStyles.cardBg || '#f8fafc',
+                                                                background: colorStyles.cardBg || 'var(--input)',
                                                                 borderRadius: 12,
                                                                 padding: '1rem 1rem 0.95rem',
                                                                 boxShadow: 'none',
-                                                                border: '1px solid #f1f5f9',
+                                                                border: '1px solid var(--border)',
                                                                 borderLeftWidth: '4px',
-                                                                borderLeftColor: (colorStyles.border?.split(' ')[2]) || '#a3a3a3',
+                                                                borderLeftColor: (colorStyles.border?.split(' ')[2]) || 'var(--border)',
                                                                 borderLeftStyle: 'solid',
                                                                 minWidth: 0,
                                                                 display: 'flex',
@@ -743,7 +732,7 @@ const ResumeAnalyzer = () => {
                                                                         fontWeight: 600,
                                                                         fontSize: 14,
                                                                         marginBottom: 0,
-                                                                        color: colorStyles.cardTitle || '#334155',
+                                                                        color: colorStyles.cardTitle || 'var(--card-foreground)',
                                                                         lineHeight: 1.4,
                                                                         letterSpacing: '-0.01em'
                                                                     }}
@@ -757,7 +746,7 @@ const ResumeAnalyzer = () => {
                                                                     ...subTextStyle,
                                                                     marginBottom: 0,
                                                                     marginTop: 4,
-                                                                    color: '#94a3b8',
+                                                                    color: 'var(--muted-foreground)',
                                                                     fontSize: 13.25,
                                                                     lineHeight: 1.6,
                                                                     minHeight: 0,
@@ -785,7 +774,7 @@ const ResumeAnalyzer = () => {
                         ) : (
                             <div className="awaiting-analysis" style={{
                                 textAlign: 'center',
-                                color: '#94a3b8',
+                                color: 'var(--muted-foreground)',
                                 fontSize: 14,
                                 padding: '2rem 0 1.25rem 0',
                                 fontWeight: 400,

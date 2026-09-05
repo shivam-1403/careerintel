@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Target,
@@ -16,8 +16,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Loader from '../../components/ui/Loader';
 import './Dashboard.css';
-
-const API_BASE = 'https://careerintel-w10f.onrender.com';
+import API_BASE from '../../config/api';
 
 const authHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem('token')}`

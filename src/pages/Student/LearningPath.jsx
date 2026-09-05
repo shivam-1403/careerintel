@@ -1,10 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from "react-router-dom";
 import { Play, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, ChevronDown, Target, Info } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Loader from '../../components/ui/Loader';
 import './LearningPath.css';
+import API_BASE from '../../config/api';
 
 const LearningPath = () => {
     const [roadmap, setRoadmap] = useState([]);
@@ -21,7 +22,7 @@ const LearningPath = () => {
         const fetchTargetRole = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
+                const response = await fetch(`${API_BASE}/user/profile`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const profile = await response.json();
@@ -43,7 +44,7 @@ const LearningPath = () => {
 
                 // 1️⃣ get user's target role first, then check URL
                 const profileRes = await fetch(
-                    "https://careerintel-w10f.onrender.com/user/profile",
+                    `${API_BASE}/user/profile`,
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }
@@ -61,7 +62,7 @@ const LearningPath = () => {
 
                 // 2️⃣ get skill gap for that role (for soft skills display)
                 const gapRes = await fetch(
-                    `https://careerintel-w10f.onrender.com/career/gap/${roleIdToUse}`,
+                    `${API_BASE}/career/gap/${roleIdToUse}`,
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }
@@ -72,7 +73,7 @@ const LearningPath = () => {
 
                 // 3️⃣ generate roadmap from backend
                 const roadmapRes = await fetch(
-                    `https://careerintel-w10f.onrender.com/roadmap/generate/${roleIdToUse}`,
+                    `${API_BASE}/roadmap/generate/${roleIdToUse}`,
                     {
                         method: "POST",
                         headers: { Authorization: `Bearer ${token}` }
@@ -99,7 +100,7 @@ const LearningPath = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await fetch(
-                `https://careerintel-w10f.onrender.com/user/target-role/${roleIdFromURL}`,
+                `${API_BASE}/user/target-role/${roleIdFromURL}`,
                 {
                     method: "PUT",
                     headers: { Authorization: `Bearer ${token}` }

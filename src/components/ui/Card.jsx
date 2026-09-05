@@ -1,9 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 import './Card.css';
 
-const Card = ({ children, className = '', title, subtitle, headerAction }) => {
+const Card = ({ children, className = '', title, subtitle, headerAction, style }) => {
     return (
-        <div className={`card ${className}`}>
+        <div className={`card ${className}`} style={style}>
             {(title || subtitle || headerAction) && (
                 <div className="card-header">
                     <div>

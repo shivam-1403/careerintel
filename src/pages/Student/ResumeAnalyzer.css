@@ -19,19 +19,18 @@
 }
 
 .career-dropdown {
-    width: 100%;
     padding: 10px 14px;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    border: 1px solid #ccc;
+    background-color: var(--card);
+    color: var(--foreground);
     font-size: 14px;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    background-color: white;
+    cursor: pointer;
     transition: border 0.2s ease;
 }
 
 .career-dropdown:focus {
-    border-color: #5b5bd6;
+    border-color: var(--primary);
     outline: none;
 }
 
@@ -342,7 +341,7 @@
 }
 
 .score-breakdown strong {
-  color: #1f2937;
+  color: var(--card-foreground);
 }
 
 .tags-wrapper {
@@ -430,7 +429,7 @@
 
 .status-tag.moderate {
     background-color: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    color: var(--primary);
 }
 
 .status-tag.weak {
@@ -475,8 +474,13 @@
     opacity: 0.6;
 }
 
-@media (max-width: 1024px) {
-    .analyzer-grid {
-        grid-template-columns: 1fr;
+@media (max-width: 900px) {
+    .analyzer-dashboard-grid {
+        flex-direction: column !important;
+        gap: 20px !important;
+    }
+
+    .modern-grid-list {
+        grid-template-columns: 1fr !important;
     }
 }

@@ -28,6 +28,7 @@ __pycache__/
 *.pyc
 venv/
 .env
+.env.production
 
 # Node
 node_modules/

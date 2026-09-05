@@ -218,10 +218,10 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.875rem 1rem;
-    background-color: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background-color: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.25);
     border-radius: var(--radius-md);
-    color: #3b82f6;
+    color: var(--primary);
     font-size: 0.875rem;
     margin-bottom: 1rem;
 }

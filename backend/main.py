@@ -70,7 +70,7 @@ Provide a short, clear, practical career insight in exactly 3-4 lines. Focus on:
 Keep it encouraging but honest. No bullet points, just natural paragraphs."""
 
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="openai/gpt-oss-120b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=300
@@ -89,6 +89,71 @@ def extract_text_from_pdf(file):
         for page in pdf.pages:
             text += page.extract_text() or ""
     return text.lower()
+
+
+# Semantic Skill Understanding Function
+def extract_skills_with_ai(text, available_skills):
+    """
+    Extract skills from resume text using Groq AI.
+    Returns a list of dicts: [{"skill": "Python", "evidence": "Used python for script", "confidence": "high"}]
+    """
+    try:
+        client = get_groq_client()
+        if not client:
+            return []
+
+        import json
+
+        # Convert available_skills to a simple list of names for the prompt
+        skill_names = [s.name if hasattr(s, "name") else str(s) for s in available_skills]
+
+        prompt = f"""You are an expert ATS (Applicant Tracking System) parser.
+Your task is to identify which of the provided predefined skills are present in the provided resume text.
+Do not match based only on exact keywords; understand the semantic meaning.
+For example, if the resume says "created interactive dashboards", that is evidence for the skill "Data Visualization" (if it's in the list).
+
+PROVIDED SKILL LIST:
+{', '.join(skill_names)}
+
+RESUME TEXT:
+{text[:4000]}  # limit text length for safety
+
+Instructions:
+1. ONLY return skills that exist EXACTLY as written in the PROVIDED SKILL LIST.
+2. For each identified skill, provide a brief snippet of evidence from the resume.
+3. Provide a confidence level ("high", "medium", "low").
+4. Return ONLY a valid JSON array of objects, with no other text, markdown, or explanations.
+Format: [{{ "skill": "Skill Name", "evidence": "brief snippet", "confidence": "high" }}]"""
+
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-120b", # Using supported model from API
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1
+        )
+
+        content = response.choices[0].message.content
+
+        # Strip markdown code blocks if the model ignored instructions
+        if content.startswith("```json"):
+            content = content[7:-3]
+        elif content.startswith("```"):
+            content = content[3:-3]
+
+        result = json.loads(content.strip())
+
+        # If it returned a dictionary with an array inside (e.g. {"skills": [...]})
+        if isinstance(result, dict):
+            for key in result:
+                if isinstance(result[key], list):
+                    return result[key]
+            return []
+
+        return result if isinstance(result, list) else []
+
+    except Exception as e:
+        print(f"Semantic Extraction Error: {e}")
+        return []
+
 
 class LoginRequest(BaseModel):
     email: str
@@ -739,31 +804,48 @@ def analyze_resume_for_role(
     if not text.strip():
         raise HTTPException(status_code=400, detail="No readable text found.")
 
-    # 2️⃣ Extract skills from resume
-    extracted_skills = extract_skills_from_text(text, db)
-    # Ensure we only work with skill names
-    extracted_skills = [
-        s.name if hasattr(s, "name") else s
-        for s in extracted_skills
-    ]
-
-    # 3️⃣ Get role
+    # 2️⃣ Get role & role skills
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
-
-    # 4️⃣ Get role required skills with weights
+        
     role_skills = (
         db.query(RoleSkill)
         .filter(RoleSkill.role_id == role_id)
         .all()
     )
-
     if not role_skills:
         raise HTTPException(status_code=400, detail="No skills mapped to this role")
 
-    total_weight = sum(rs.importance_weight for rs in role_skills)
+    # 3️⃣ Deterministic Extraction
+    deterministic_skills = extract_skills_from_text(text, db)
+    deterministic_names = {s.name.lower() for s in deterministic_skills}
 
+    # 4️⃣ Identify Technical Gaps to send to AI
+    gap_skills_for_ai = []
+    for rs in role_skills:
+        skill = db.get(Skill, rs.skill_id)
+        if skill.name.lower() not in deterministic_names and skill.category != "soft":
+            gap_skills_for_ai.append(skill)
+
+    # 5️⃣ AI Semantic Extraction (only on gaps)
+    ai_skills = []
+    if gap_skills_for_ai:
+        ai_results = extract_skills_with_ai(text, gap_skills_for_ai)
+        for item in ai_results:
+            skill_name = item.get("skill")
+            if skill_name:
+                skill_obj = db.query(Skill).filter(Skill.name == skill_name).first()
+                if skill_obj:
+                    ai_skills.append(skill_obj)
+
+    # 6️⃣ Merge deterministic and AI skills
+    combined_skills_map = {s.id: s for s in (deterministic_skills + ai_skills)}
+    final_extracted_skills = list(combined_skills_map.values())
+    extracted_skills = [s.name for s in final_extracted_skills]
+
+    # 7️⃣ Calculate Final Score & Missing Skills
+    total_weight = sum(rs.importance_weight for rs in role_skills)
     matched_weight = 0
     matched = []
     missing = []
@@ -777,7 +859,12 @@ def analyze_resume_for_role(
             matched_weight += rs.importance_weight
             matched.append(skill.name)
         else:
-            missing.append(skill.name)
+            # Only surface technical/tool/certification gaps as "missing".
+            # Soft skills (Communication, Problem Solving, etc.) are never
+            # detectable from resume text so we exclude them from the list.
+            # NOTE: matched_weight and total_weight are unchanged — score is unaffected.
+            if skill.category != "soft":
+                missing.append(skill.name)
 
     # 5️⃣ Resume Evidence Score
     evidence_score = round((matched_weight / total_weight) * 100, 2)

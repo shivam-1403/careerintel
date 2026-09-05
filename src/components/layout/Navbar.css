@@ -108,7 +108,7 @@
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    background: #e0e0e0;
+    background: var(--input);
 }
 
 @media (max-width: 768px) {
@@ -226,7 +226,7 @@
 }
 
 .notification-item:hover {
-    background: #f8fafc;
+    background: var(--input);
 }
 
 .notification-icon-wrapper {
@@ -286,7 +286,7 @@
 .notification-footer {
     padding: 12px 20px;
     border-top: 1px solid var(--border);
-    background: #f8fafc;
+    background: var(--input);
     text-align: center;
 }
 
@@ -402,7 +402,8 @@
     font-size: 0.68rem;
     font-weight: 500;
     color: var(--muted-foreground);
-    background: rgba(0, 0, 0, 0.045);
+    background: var(--input);
+    border: 1px solid var(--border);
     padding: 4px 8px;
     border-radius: 6px;
     align-self: center;
@@ -410,7 +411,7 @@
 
 .search-result-item:hover .search-skill-soon-badge,
 .search-result-item.selected .search-skill-soon-badge {
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--border);
     color: var(--foreground);
 }
 

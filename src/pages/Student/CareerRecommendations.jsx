@@ -5,6 +5,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Loader from '../../components/ui/Loader';
 import './CareerRecommendations.css';
+import API_BASE from '../../config/api';
 
 const CareerRecommendations = () => {
     const navigate = useNavigate();
@@ -27,8 +28,8 @@ const CareerRecommendations = () => {
                 const headers = { Authorization: `Bearer ${token}` };
 
                 const [userRes, recRes] = await Promise.all([
-                    fetch("https://careerintel-w10f.onrender.com/user/profile", { headers }),
-                    fetch("https://careerintel-w10f.onrender.com/career/recommend", { headers })
+                    fetch(`${API_BASE}/user/profile`, { headers }),
+                    fetch(`${API_BASE}/career/recommend`, { headers })
                 ]);
 
                 const userData = userRes.ok ? await userRes.json() : null;
@@ -81,7 +82,7 @@ const CareerRecommendations = () => {
         setLoadingRole(career.role_id);
 
         try {
-            const response = await fetch(`https://careerintel-w10f.onrender.com/user/target-role/${career.role_id}`, {
+            const response = await fetch(`${API_BASE}/user/target-role/${career.role_id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -92,8 +93,8 @@ const CareerRecommendations = () => {
             if (response.ok) {
                 // Refetch user data and recommendations
                 const [userRes, recRes] = await Promise.all([
-                    fetch("https://careerintel-w10f.onrender.com/user/profile", { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch("https://careerintel-w10f.onrender.com/career/recommend", { headers: { Authorization: `Bearer ${token}` } })
+                    fetch(`${API_BASE}/user/profile`, { headers: { Authorization: `Bearer ${token}` } }),
+                    fetch(`${API_BASE}/career/recommend`, { headers: { Authorization: `Bearer ${token}` } })
                 ]);
 
                 const userData = userRes.ok ? await userRes.json() : null;

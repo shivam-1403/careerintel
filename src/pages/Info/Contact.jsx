@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Mail, MessageCircle, Clock } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Loader from '../../components/ui/Loader';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import '../Landing.css';
 
 const Contact = () => {
@@ -56,6 +57,7 @@ const Contact = () => {
                             <span className="brand-name">CareerIntel</span>
                         </div>
                         <div className="nav-links">
+                            <ThemeToggle />
                             <Link to="/" className="back-link">
                                 <ArrowLeft size={18} /> Back to Home
                             </Link>

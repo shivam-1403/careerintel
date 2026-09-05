@@ -1,8 +1,10 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MailCheck } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import './Auth.css';
+import API_BASE from '../../config/api';
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
@@ -23,7 +25,7 @@ const ForgotPassword = () => {
         setLoading(true);
 
         try {
-            const response = await fetch("https://careerintel-w10f.onrender.com/auth/forgot-password", {
+            const response = await fetch(`${API_BASE}/auth/forgot-password`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -51,6 +53,7 @@ const ForgotPassword = () => {
 
     return (
         <div className="auth-container">
+            <ThemeToggle className="auth-theme-toggle" />
             <div className="auth-card glass">
                 <div className="auth-header">
                     <div className="brand" onClick={() => navigate('/')}>
@@ -102,7 +105,7 @@ const ForgotPassword = () => {
                 ) : (
                     <div className="auth-success-state" style={{ textAlign: 'center', padding: '1rem 0' }}>
                         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)' }}>
                                 <MailCheck size={32} />
                             </div>
                         </div>

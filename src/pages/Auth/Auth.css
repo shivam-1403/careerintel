@@ -9,6 +9,13 @@
     background-color: var(--background);
 }
 
+.auth-theme-toggle {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 20;
+}
+
 .auth-background {
     position: absolute;
     top: 0;

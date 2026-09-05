@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
     Brain,
     Sparkles,
@@ -144,11 +144,11 @@ const AdminDashboard = () => {
                     <div className="chart-container">
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={skillGapData} layout="vertical">
-                                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="var(--border)" />
                                 <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} width={120} />
-                                <RechartsTooltip />
-                                <Bar dataKey="gaps" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={20} />
+                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} width={120} />
+                                <RechartsTooltip contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--card)', color: 'var(--card-foreground)' }} />
+                                <Bar dataKey="gaps" fill="var(--primary)" radius={[0, 4, 4, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

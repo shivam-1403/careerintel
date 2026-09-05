@@ -4,6 +4,8 @@ import ScrollToTop from "./components/utils/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastProvider } from "./components/ui/Toast";
 
+import { ThemeProvider } from './context/ThemeContext';
+
 // Layouts
 import MainLayout from './components/layout/MainLayout';
 import BaseLayout from './components/layout/BaseLayout';
@@ -31,12 +33,13 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 
 function App() {
   return (
-    <Router>
-      <ToastProvider>
-        <ScrollToTop />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<BaseLayout><Landing /></BaseLayout>} />
+    <ThemeProvider>
+      <Router>
+        <ToastProvider>
+          <ScrollToTop />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<BaseLayout><Landing /></BaseLayout>} />
           <Route path="/login" element={<BaseLayout><Login /></BaseLayout>} />
           <Route path="/signup" element={<BaseLayout><Signup /></BaseLayout>} />
           <Route path="/forgot-password" element={<BaseLayout><ForgotPassword /></BaseLayout>} />
@@ -127,7 +130,8 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ToastProvider>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 }
 

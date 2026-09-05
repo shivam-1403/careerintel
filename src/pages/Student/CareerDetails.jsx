@@ -5,8 +5,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import './Dashboard.css';
 import './CareerDetails.css';
-
-const API_BASE = 'https://careerintel-w10f.onrender.com';
+import API_BASE from '../../config/api';
 
 // Returns headers with Authorization if JWT is available; safe for both guests and logged-in users
 const authHeaders = () => {

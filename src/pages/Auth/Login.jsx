@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import PasswordInput from '../../components/ui/PasswordInput';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import './Auth.css';
+import API_BASE from '../../config/api';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -17,7 +19,7 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const response = await fetch("https://careerintel-w10f.onrender.com/auth/login", {
+            const response = await fetch(`${API_BASE}/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -42,7 +44,7 @@ const Login = () => {
             console.log("Stored token:", localStorage.getItem("token"));
 
             // Fetch user profile and store in localStorage
-            const profileRes = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
+            const profileRes = await fetch(`${API_BASE}/user/profile`, {
                 headers: { Authorization: `Bearer ${data.access_token}` }
             });
             const userData = await profileRes.json();
@@ -60,6 +62,7 @@ const Login = () => {
 
     return (
         <div className="auth-container">
+            <ThemeToggle className="auth-theme-toggle" />
             <div className="auth-card glass">
                 <div className="auth-header">
                     <div className="brand" onClick={() => navigate('/')}>

@@ -3,7 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import PasswordInput from '../../components/ui/PasswordInput';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import './Auth.css';
+import API_BASE from '../../config/api';
 
 const ResetPassword = () => {
     const navigate = useNavigate();
@@ -38,7 +40,7 @@ const ResetPassword = () => {
         setLoading(true);
 
         try {
-            const response = await fetch("https://careerintel-w10f.onrender.com/auth/reset-password", {
+            const response = await fetch(`${API_BASE}/auth/reset-password`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -69,6 +71,7 @@ const ResetPassword = () => {
 
     return (
         <div className="auth-container">
+            <ThemeToggle className="auth-theme-toggle" />
             <div className="auth-card glass">
                 <div className="auth-header">
                     <div className="brand" onClick={() => navigate('/')}>
@@ -127,7 +130,7 @@ const ResetPassword = () => {
                 ) : (
                     <div className="auth-success-state" style={{ textAlign: 'center', padding: '1rem 0' }}>
                         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)' }}>
                                 <CheckCircle size={32} />
                             </div>
                         </div>

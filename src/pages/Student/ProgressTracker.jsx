@@ -16,8 +16,9 @@ import { Award, Target, TrendingUp, ArrowUp, ArrowDown, Minus } from 'lucide-rea
 import Card from '../../components/ui/Card';
 import Loader from '../../components/ui/Loader';
 import './ProgressTracker.css';
+import API_BASE from '../../config/api';
 
-const BASE_URL = "https://careerintel-w10f.onrender.com";
+const BASE_URL = API_BASE;
 
 // Colors for charts
 const COLORS = {
@@ -200,7 +201,7 @@ const ProgressTracker = () => {
                     <p className="page-subtitle">Track your career improvement over time.</p>
                 </div>
                 <Card>
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--destructive)' }}>
                         <p>{error}</p>
                         <button onClick={fetchAllData} style={{ marginTop: '12px', padding: '8px 16px', cursor: 'pointer' }}>
                             Try Again
@@ -221,9 +222,9 @@ const ProgressTracker = () => {
                 </div>
                 <Card>
                     <div style={{ textAlign: 'center', padding: '40px' }}>
-                        <Target size={48} style={{ color: '#94a3b8', marginBottom: '16px' }} />
+                        <Target size={48} style={{ color: 'var(--muted-foreground)', marginBottom: '16px' }} />
                         <h3>No Target Role Set</h3>
-                        <p style={{ color: '#64748b', marginTop: '8px' }}>
+                        <p style={{ color: 'var(--muted-foreground)', marginTop: '8px' }}>
                             Set a target role to start tracking your career insights.
                         </p>
                         <button
@@ -231,8 +232,8 @@ const ProgressTracker = () => {
                             style={{
                                 marginTop: '16px',
                                 padding: '10px 20px',
-                                background: '#4f46e5',
-                                color: '#fff',
+                                background: 'var(--primary)',
+                                color: 'white',
                                 border: 'none',
                                 borderRadius: '8px',
                                 cursor: 'pointer'
@@ -300,22 +301,24 @@ const ProgressTracker = () => {
                         <div className="chart-container">
                             <ResponsiveContainer width="100%" height={250}>
                                 <LineChart data={resumeHistory}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                     <XAxis
                                         dataKey="scan"
-                                        tick={{ fontSize: 12, fill: '#94a3b8' }}
+                                        tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
                                         tickFormatter={(val) => `Scan ${val}`}
                                     />
                                     <YAxis
                                         domain={[0, 100]}
-                                        tick={{ fontSize: 12, fill: '#94a3b8' }}
+                                        tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
                                         tickFormatter={(val) => `${val}%`}
                                     />
                                     <Tooltip
                                         contentStyle={{
                                             borderRadius: '8px',
-                                            border: 'none',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                            border: '1px solid var(--border)',
+                                            backgroundColor: 'var(--card)',
+                                            color: 'var(--card-foreground)',
+                                            boxShadow: 'var(--shadow-md)'
                                         }}
                                         formatter={(value) => [`${value}%`, 'Score']}
                                         labelFormatter={(label) => `Scan #${label}`}
@@ -334,7 +337,7 @@ const ProgressTracker = () => {
                     ) : (
                         <div className="empty-chart">
                             <p>No resume scans yet</p>
-                            <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
                                 Upload a resume to see your score trend
                             </p>
                         </div>
@@ -367,17 +370,26 @@ const ProgressTracker = () => {
                                         y="50%"
                                         textAnchor="middle"
                                         dominantBaseline="middle"
-                                        style={{ fontSize: 22, fontWeight: 700, fill: '#1e293b' }}
+                                        style={{ fontSize: 22, fontWeight: 700, fill: 'var(--card-foreground)' }}
                                     >
                                         <tspan dy="-20">{skillMatchPercent}%</tspan>
-                                        <tspan x="50%" dy="16" style={{ fontSize: 11, fill: '#64748b' }}>Match</tspan>
+                                        <tspan x="50%" dy="16" style={{ fontSize: 11, fill: 'var(--muted-foreground)' }}>Match</tspan>
                                     </text>
-                                    <Tooltip formatter={(value) => [`${value} skills`, '']} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border)',
+                                            backgroundColor: 'var(--card)',
+                                            color: 'var(--card-foreground)',
+                                            boxShadow: 'var(--shadow-md)'
+                                        }}
+                                        formatter={(value) => [`${value} skills`, '']}
+                                    />
                                     <Legend
                                         verticalAlign="bottom"
                                         height={36}
                                         formatter={(value, entry) => (
-                                            <span style={{ color: '#1e293b', fontSize: 12 }}>
+                                            <span style={{ color: 'var(--card-foreground)', fontSize: 12 }}>
                                                 {value}: {entry.payload.value}
                                             </span>
                                         )}
@@ -411,7 +423,7 @@ const ProgressTracker = () => {
                         </div>
                     ) : (
                         <div className="empty-chart">
-                            <p style={{ color: '#22c55e' }}>
+                            <p style={{ color: 'var(--success)' }}>
                                 {matchedSkills.length > 0
                                     ? "All required skills acquired!"
                                     : "No target role selected"}

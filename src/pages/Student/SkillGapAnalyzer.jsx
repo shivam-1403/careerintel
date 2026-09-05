@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { Target, CheckCircle, XCircle, Info } from 'lucide-react';
@@ -6,6 +6,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Loader from '../../components/ui/Loader';
 import './SkillGapAnalyzer.css';
+import API_BASE from '../../config/api';
 
 const SkillGapAnalyzer = () => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const SkillGapAnalyzer = () => {
         const fetchTargetRole = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await fetch("https://careerintel-w10f.onrender.com/user/profile", {
+                const response = await fetch(`${API_BASE}/user/profile`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const profile = await response.json();
@@ -42,7 +43,7 @@ const SkillGapAnalyzer = () => {
 
                 if (!roleIdToUse) {
                     const profileResponse = await fetch(
-                        'https://careerintel-w10f.onrender.com/user/profile',
+                        `${API_BASE}/user/profile`,
                         {
                             headers: { Authorization: `Bearer ${token}` }
                         }
@@ -65,7 +66,7 @@ const SkillGapAnalyzer = () => {
 
                 // 3️⃣ Fetch correct role gap
                 const gapResponse = await fetch(
-                    `https://careerintel-w10f.onrender.com/career/gap/${roleIdToUse}`,
+                    `${API_BASE}/career/gap/${roleIdToUse}`,
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }
@@ -89,7 +90,7 @@ const SkillGapAnalyzer = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await fetch(
-                `https://careerintel-w10f.onrender.com/user/target-role/${roleIdFromURL}`,
+                `${API_BASE}/user/target-role/${roleIdFromURL}`,
                 {
                     method: "PUT",
                     headers: { Authorization: `Bearer ${token}` }

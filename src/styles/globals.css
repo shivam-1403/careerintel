@@ -32,6 +32,171 @@
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+[data-theme='dark'] {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --border: #334155;
+  --input: #162032;
+  --ring: rgba(79, 70, 229, 0.4);
+
+  --muted: #94a3b8;
+  --muted-foreground: #94a3b8;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+}
+
+/* ==========================================
+   DARK MODE COMPONENT-LEVEL OVERRIDES
+   ========================================== */
+
+/* Recharts SVG text/ticks */
+[data-theme='dark'] .recharts-text,
+[data-theme='dark'] .recharts-cartesian-axis-tick-value,
+[data-theme='dark'] .recharts-label {
+  fill: #94a3b8 !important;
+}
+
+/* Recharts tooltip */
+[data-theme='dark'] .recharts-default-tooltip {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .recharts-tooltip-label {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .recharts-tooltip-item {
+  color: #cbd5e1 !important;
+}
+
+/* Glassmorphism dark override */
+[data-theme='dark'] .glass {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+/* Table rows hover */
+[data-theme='dark'] .admin-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* CareerDetails subtle bg */
+[data-theme='dark'] .ai-career-insight-pair {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme='dark'] .ai-career-insight-pair:hover {
+  background: rgba(99, 102, 241, 0.06);
+}
+
+/* CareerDetails empty state  */
+[data-theme='dark'] .career-details-empty-state {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Dashboard status badges light bg adjustment */
+[data-theme='dark'] .status-badge.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+[data-theme='dark'] .status-badge.caution {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+[data-theme='dark'] .status-badge.ok {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+/* Tag contrast in dark mode */
+[data-theme='dark'] .intel-tag-matched {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+[data-theme='dark'] .intel-tag-missing-tech {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+[data-theme='dark'] .intel-tag-missing-soft {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+[data-theme='dark'] .empty-matched {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+}
+
+[data-theme='dark'] .empty-missing {
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.15);
+}
+
+[data-theme='dark'] .skill-status {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.2);
+}
+
+/* ResumeAnalyzer career-dropdown override */
+[data-theme='dark'] .career-dropdown:focus {
+  border-color: var(--primary);
+}
+
+/* Intel hero status pills: adjust for dark backgrounds */
+[data-theme='dark'] .intel-status-bad {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+[data-theme='dark'] .intel-status-mid {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+[data-theme='dark'] .intel-status-good {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+/* Dashboard stat-icon blue override */
+[data-theme='dark'] .stat-icon.blue {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+/* ProgressTracker icon override */
+[data-theme='dark'] .ov-icon.blue {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+/* Scrollbar */
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -85,10 +250,16 @@ select {
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background-color: var(--card);
+  color: var(--foreground);
   padding: 0.625rem 0.875rem;
   width: 100%;
   transition: var(--transition-fast);
   cursor: text;
+}
+
+option {
+  background-color: var(--card);
+  color: var(--foreground);
 }
 
 input:hover,

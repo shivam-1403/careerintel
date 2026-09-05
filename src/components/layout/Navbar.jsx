@@ -1,9 +1,12 @@
-﻿import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Bell, Menu, TrendingUp, Target, Lightbulb, Zap, Briefcase, Code, Loader2 } from 'lucide-react';
+import { Search, Bell, Menu, TrendingUp, Target, Lightbulb, Zap, Briefcase, Code, Loader2, Sun, Moon } from 'lucide-react';
 import './Navbar.css';
+import API_BASE from '../../config/api';
+import { useTheme } from '../../context/ThemeContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
-const BASE_URL = "https://careerintel-w10f.onrender.com";
+const BASE_URL = API_BASE;
 
 // Modern notification data structure
 const generateNotifications = () => {
@@ -50,6 +53,7 @@ const Navbar = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { theme, toggleTheme } = useTheme();
 
     // Search state
     const [searchQuery, setSearchQuery] = useState('');
@@ -370,6 +374,9 @@ const Navbar = ({ toggleSidebar }) => {
             </div>
 
             <div className="navbar-right">
+                {/* Theme Toggle */}
+                <ThemeToggle />
+
                 {/* Notifications */}
                 <div className="notification-wrapper" ref={notificationRef}>
                     <button

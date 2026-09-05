@@ -1,10 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Mail, Tag, Save } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
 import Loader from '../../components/ui/Loader';
 import './Profile.css';
+import API_BASE from '../../config/api';
 
 const getInitials = (first, last) => {
     return (first?.charAt(0) || "") + (last?.charAt(0) || "");
@@ -66,7 +67,7 @@ const Profile = () => {
             const token = localStorage.getItem("token");
 
             const userRes = await fetch(
-                "https://careerintel-w10f.onrender.com/user/profile",
+                `${API_BASE}/user/profile`,
                 {
                     headers: { Authorization: `Bearer ${token}` }
                 }
@@ -83,7 +84,7 @@ const Profile = () => {
             });
 
             const skillsRes = await fetch(
-                "https://careerintel-w10f.onrender.com/skills",
+                `${API_BASE}/skills`,
                 {
                     headers: { Authorization: `Bearer ${token}` }
                 }
@@ -174,7 +175,7 @@ const Profile = () => {
                 email: formData.email.trim()
             };
 
-            const res = await fetch("https://careerintel-w10f.onrender.com/user/update", {
+            const res = await fetch(`${API_BASE}/user/update`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -213,7 +214,7 @@ const Profile = () => {
 
         try {
             const res = await fetch(
-                `https://careerintel-w10f.onrender.com/skills/search?query=${query}`,
+                `${API_BASE}/skills/search?query=${query}`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -239,7 +240,7 @@ const Profile = () => {
 
         try {
             const res = await fetch(
-                "https://careerintel-w10f.onrender.com/skills/add",
+                `${API_BASE}/skills/add`,
                 {
                     method: "POST",
                     headers: {
@@ -272,7 +273,7 @@ const Profile = () => {
 
     const removeSkill = async (skillToRemove) => {
 
-        await fetch(`https://careerintel-w10f.onrender.com/skills/remove?name=${skillToRemove}`, {
+        await fetch(`${API_BASE}/skills/remove?name=${skillToRemove}`, {
             method: "DELETE",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`

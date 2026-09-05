@@ -1,7 +1,8 @@
-﻿import React from 'react';
+import React from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Rocket, Target, Shield, Zap, CheckCircle, ArrowRight } from 'lucide-react';
 import Button from '../components/ui/Button';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import './Landing.css';
 
 const Landing = () => {
@@ -62,6 +63,7 @@ const Landing = () => {
                     <div className="nav-links">
                         <a href="#features">Features</a>
                         <a href="#how-it-works">How it Works</a>
+                        <ThemeToggle />
                         <Button variant="ghost" onClick={() => navigate('/login')}>Login</Button>
                         <Button onClick={() => navigate('/signup')}>Get Started</Button>
                     </div>

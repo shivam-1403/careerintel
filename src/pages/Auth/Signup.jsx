@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import PasswordInput from '../../components/ui/PasswordInput';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import './Auth.css';
+import API_BASE from '../../config/api';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -19,7 +21,7 @@ const Signup = () => {
         setLoading(true);
 
         try {
-            const res = await fetch("https://careerintel-w10f.onrender.com/auth/signup", {
+            const res = await fetch(`${API_BASE}/auth/signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -52,6 +54,7 @@ const Signup = () => {
 
     return (
         <div className="auth-container">
+            <ThemeToggle className="auth-theme-toggle" />
             <div className="auth-card glass">
                 <div className="auth-header">
                     <div className="brand" onClick={() => navigate('/')}>
